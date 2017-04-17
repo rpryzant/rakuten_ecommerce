@@ -12,6 +12,9 @@ Discovering the best parts of ecommerce product descriptions. Data courtesy of [
    * Filename: `<type>_sales.txt`
    * Format: `<item_id> <sold unit>`
    
+* **Note**
+   * Files are tab-seperated
+   
 ## Approach
 
 Use adversarial discriminative network to find subsequences of `description` that are predictive of `log(sold_unit)`, irrespective of other factors (title, price, shop rating, category id).
