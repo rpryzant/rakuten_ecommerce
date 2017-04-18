@@ -12,7 +12,10 @@ def main():
         '../data/example_data/bpe.vocab',
         '../data/example_data/bag.outputs',
         c)
-    sess = tf.Session()
+
+    os.environ['CUDA_VISIBLE_DEVICES'] = '1' # Or whichever device you would like to use
+    gpu_options = tf.GPUOptions(allow_growth=True)
+    sess =  tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True))
 
     m = model.Model(c, sess, d)
 
