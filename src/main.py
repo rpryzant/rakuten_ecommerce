@@ -16,7 +16,12 @@ def main():
 
     m = model.Model(c, sess, d)
 
+    sess.run(tf.global_variables_initializer())    
 
+    (example, lens, sales, price, shop, category)  = next(d.batch_iter())
+
+    while(True):
+        print m.train_on_batch(example, lens, sales)
 
 
 

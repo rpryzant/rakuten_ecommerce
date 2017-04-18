@@ -4,7 +4,7 @@ from tensorflow.python.framework import function
 from tensorflow.contrib.rnn.python.ops import rnn
 from graph_module import GraphModule
 from collections import namedtuple
-
+import numpy as np
 
 class Model:
 
@@ -17,6 +17,10 @@ class Model:
         self.hidden_size = config.hidden_size
         self.num_layers = config.num_layers
         self.num_attention_units = config.num_attention_units
+        self.prediction_hidden_size = config.prediction_hidden_size
+        self.optimizer = config.optimizer
+        self.gradient_clip = config.gradient_clip
+        self.train_dropout = config.dropout_rate
 
 
         # training
@@ -34,16 +38,73 @@ class Model:
         self.price = tf.placeholder(tf.float32, [self.batch_size], name='price')
         self.category = tf.placeholder(tf.int32, [self.batch_size], name='category')
 
+        source_encoding = self.encode(self.source, self.source_len)
+
+        with tf.variable_scope('sales'):
+            sales_hat, sales_loss = self.sales_predictor(self.log_sales, source_encoding)
+
+        self.loss = sales_loss
+        self.sales_hat = sales_hat
+
+        self.train_step = self.optimize(self.loss)
+
+
+    def train_on_batch(self, source, source_len, log_sales, learning_rate=0.0003):
+        _, logits, loss = self.sess.run([self.train_step, self.sales_hat, self.loss],
+                                feed_dict={
+                                    self.source: source,
+                                    self.source_len: source_len,
+                                    self.log_sales: log_sales,
+                                    self.learning_rate: learning_rate,
+                                    self.dropout: self.train_dropout
+                                })
+        return list(logits), log_sales, loss
+
+
+
+
+
+    def optimize(self, loss):
+        train_op = tf.contrib.layers.optimize_loss(
+            loss=loss,
+            global_step=self.global_step,
+            learning_rate=self.learning_rate,
+            clip_gradients=self.gradient_clip,
+            optimizer=self.optimizer,
+            summaries=["learning_rate", "loss", "gradients", "gradient_norm"])
+        return train_op
+
+
+
+
+
+    def sales_predictor(self, sales, encoder_output):
+        scores, attentional_context = self.run_attention(encoder_output)
+
+        fc1 = tf.contrib.layers.fully_connected(
+            inputs=attentional_context,
+            num_outputs=self.prediction_hidden_size,
+            activation_fn=tf.nn.tanh,
+            scope='sales_fc')  
+
+        preds = tf.contrib.layers.fully_connected(
+            inputs=fc1,
+            num_outputs=1,
+            activation_fn=None,
+            scope='sales_pred')
+
+        loss = tf.nn.l2_loss(preds - sales)
+        loss = tf.reduce_mean(loss)
+
+        return preds, loss
+
+
+    def encode(self, source, source_len):
         with tf.variable_scope('embedding'):
             source_embedded = self.get_embeddings(self.source)
         with tf.variable_scope('encoder'):
             encoder_output = self.run_encoder(source_embedded, self.source_len)
-        with tf.variable_scope('attention'):
-            scores, attentional_context = self.run_attention(encoder_output)
-
-        print scores
-        print attentional_context
-
+        return encoder_output
 
     def get_embeddings(self, source):
         E = tf.get_variable('E',

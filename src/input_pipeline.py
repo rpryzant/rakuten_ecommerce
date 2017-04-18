@@ -9,16 +9,16 @@ class DataInputPipeline(object):
         self.word_to_index = self.parse_vocab(vocab)
         self.index_to_word = {i: x for x, i in self.word_to_index.iteritems()}
 
-        self.targets, self.source, self.shop_to_index, self.category_to_index, broken = \
-            self.prepare_data(labels, text)
+        # todo - refactor
+        self.broken, self.sales, self.shop, self.price, \
+            self.category, self.examples, self.lens, \
+            self.shop_to_index, self.category_to_index = \
+                self.prepare_data(labels, text)
 
         self.index_to_shop = {i: x for x, i in self.shop_to_index.iteritems()}
         self.index_to_category = {i: x for x , i in self.category_to_index.iteritems()}
 
-
-        len(self.targets)
-        len(self.source)
-        self.N = len(self.source)
+        self.N = len(self.examples)
 
         self.indices = np.arange(self.N)
 
@@ -30,16 +30,26 @@ class DataInputPipeline(object):
     def batch_iter(self):
         i = 0
         while i + self.batch_size < self.N:
-            yield self.source[i: i+self.batch_size], self.targets[i: i + self.batch_size]
+            example = self.examples[i: i+self.batch_size]
+            lens = self.lens[i: i+self.batch_size]
+            sales = self.sales[i: i+self.batch_size]
+            price = self.price[i: i+self.batch_size]
+            shop = self.shop[i: i+self.batch_size]
+            category = self.category[i: i+self.batch_size]
+
+            yield example, lens, sales, price, shop, category
+
             i += self.batch_size
 
 
 
     def prepare_data(self, f, text):
+        # TODO - REFACTOR
+
         def post_pad(y, pad=utils.PAD):
             new = [pad] * self.max_len
             new[:len(y)] = y
-            return new
+            return new[:self.max_len]
 
 
         parse = []
@@ -53,21 +63,27 @@ class DataInputPipeline(object):
         category_mapping = {x: i for i, x in enumerate(categories)}
 
         broken = []
-        out_labels = []
+        out_sales = []
+        out_shop = []
+        out_price = []
+        out_category = []
         out_examples = []
+        out_lens = []
         for i, ([log_sales, shop_name, price, category], line) in enumerate(zip(parse, open(text))):
             try:
-                out_labels.append([float(log_sales), 
-                            shop_name_mapping[shop_name], 
-                            float(price), 
-                            category_mapping[category]])
-                example = [self.word_to_index.get(tok, utils.UNK) for tok in line.split()]
-                ex = post_pad(example)[::-1]
-                out_examples.append((ex, np.count_nonzero(ex)))
+                out_sales.append(float(log_sales))
+                out_shop.append(shop_name_mapping[shop_name])
+                out_price.append(float(price))
+                out_category.append(category_mapping[category])
 
+                example = [self.word_to_index.get(tok, utils.UNK) for tok in line.split()]
+                example = post_pad(example)[::-1]
+                out_examples.append(example)
+                out_lens.append(np.count_nonzero(example))
             except:
                 broken.append(i)
-        return out_labels, out_examples, shop_name_mapping, category_mapping, broken
+        return broken, out_sales, out_shop, out_price, out_category, \
+                out_examples, out_lens, shop_name_mapping, category_mapping
 
 
     def reconstruct(self, seq, shop_name=None, category=None):
@@ -80,7 +96,8 @@ class DataInputPipeline(object):
     def parse_vocab(self, f):
         d = {}
         for i, l in enumerate(open(f)):
-            d[l.split()[0]] = i + 1      # +1 to reserve 0 for pad
+            d[l.split()[0]] = i + 2      # +1 to reserve 0 for pad, 1 for unk
+        d[1] = 'UNK'
         return d
 
 
