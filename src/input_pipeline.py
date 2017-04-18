@@ -1,5 +1,6 @@
 import utils
 import numpy as np
+import math
 
 class DataInputPipeline(object):
     def __init__(self, text, vocab, labels, config):
@@ -26,6 +27,11 @@ class DataInputPipeline(object):
     def get_vocab_size(self):
         return len(self.word_to_index)
 
+    def get_num_shops(self):
+        return len(self.shop_to_index)
+
+    def get_num_categories(self):
+        return len(self.category_to_index)
 
     def batch_iter(self):
         i = 0
@@ -73,7 +79,7 @@ class DataInputPipeline(object):
             try:
                 out_sales.append(float(log_sales))
                 out_shop.append(shop_name_mapping[shop_name])
-                out_price.append(float(price))
+                out_price.append(math.log(float(price)))
                 out_category.append(category_mapping[category])
 
                 example = [self.word_to_index.get(tok, utils.UNK) for tok in line.split()]

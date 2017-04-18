@@ -10,9 +10,13 @@ class Model:
 
     def __init__(self, config, sess, dataset):
         self.sess = sess
+
         self.batch_size = config.batch_size
         self.max_len = config.max_len
         self.vocab_size = dataset.get_vocab_size()
+        self.num_shops = dataset.get_num_shops()
+        self.num_categories = dataset.get_num_categories()
+
         self.embedding_size = config.embedding_size
         self.hidden_size = config.hidden_size
         self.num_layers = config.num_layers
@@ -41,24 +45,51 @@ class Model:
         source_encoding = self.encode(self.source, self.source_len)
 
         with tf.variable_scope('sales'):
-            sales_hat, sales_loss = self.sales_predictor(self.log_sales, source_encoding)
+            sales_hat, sales_loss = self.regressor(self.log_sales,
+                                                   source_encoding, 
+                                                   reverse_grads=False, 
+                                                   name='sales')
+        with tf.variable_scope('price'):
+            price_hat, price_loss = self.regressor(self.price, 
+                                                   source_encoding, 
+                                                   reverse_grads=True, 
+                                                   name='price')
+        with tf.variable_scope('shop'):
+            shop_logits, shop_loss = self.classifier(self.shop, 
+                                                     source_encoding, 
+                                                     num_classes=self.num_shops,
+                                                     reverse_grads=True, 
+                                                     name='shop')
+        with tf.variable_scope('category'):
+            category_logits, category_loss = self.classifier(self.category, 
+                                                             source_encoding, 
+                                                             num_classes=self.num_categories,
+                                                             reverse_grads=True, 
+                                                             name='category')
 
-        self.loss = sales_loss
+
+
+        self.loss = sales_loss + price_loss + shop_loss + category_loss
         self.sales_hat = sales_hat
-
+        self.price_hat = price_hat
+        self.shop_hat = shop_logits
+        self.category_hat = category_logits
         self.train_step = self.optimize(self.loss)
 
 
-    def train_on_batch(self, source, source_len, log_sales, learning_rate=0.0003):
-        _, logits, loss = self.sess.run([self.train_step, self.sales_hat, self.loss],
+    def train_on_batch(self, source, source_len, log_sales, price, shop, category, learning_rate=0.0003):
+        _, sales_hat, price_hat, shop_hat, category_hat, loss = self.sess.run([self.train_step, self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss],
                                 feed_dict={
                                     self.source: source,
                                     self.source_len: source_len,
                                     self.log_sales: log_sales,
+                                    self.price: price,
+                                    self.shop: shop,
+                                    self.category: category,
                                     self.learning_rate: learning_rate,
                                     self.dropout: self.train_dropout
                                 })
-        return list(logits), log_sales, loss
+        return sales_hat.tolist(), log_sales, price_hat.tolist(), price, np.argmax(shop_hat, axis=1).tolist(), shop, np.argmax(category_hat, axis=1).tolist(), category, loss
 
 
 
@@ -78,25 +109,91 @@ class Model:
 
 
 
-    def sales_predictor(self, sales, encoder_output):
-        scores, attentional_context = self.run_attention(encoder_output)
+    def regressor(self, labels, encoder_output, reverse_grads=False, name='regressor'):
+        encoder_output_output = encoder_output.outputs
+        encoder_output_output_shape = encoder_output_output.get_shape()
+
+        encoder_output_att_values = encoder_output.attention_values
+        encoder_output_att_values_shape = encoder_output_att_values.get_shape()
+
+        encoder_att_values_length = encoder_output.attention_values_length
+
+        if reverse_grads:
+            encoder_output_output = reverse_grad(encoder_output_output)
+            encoder_output_output.set_shape(encoder_output_output_shape)
+
+            encoder_output_att_values = reverse_grad(encoder_output_att_values)
+            encoder_output_att_values.set_shape(encoder_output_att_values_shape)
+
+        scores, attentional_context = self.run_attention(encoder_output_output,
+                                                         encoder_output_att_values,
+                                                         encoder_att_values_length)
 
         fc1 = tf.contrib.layers.fully_connected(
             inputs=attentional_context,
             num_outputs=self.prediction_hidden_size,
             activation_fn=tf.nn.tanh,
-            scope='sales_fc')  
+            scope='%s_fc' % name)  
 
         preds = tf.contrib.layers.fully_connected(
             inputs=fc1,
             num_outputs=1,
             activation_fn=None,
-            scope='sales_pred')
+            scope='%s_pred' % name)
+        preds = tf.squeeze(preds)
 
-        loss = tf.nn.l2_loss(preds - sales)
-        loss = tf.reduce_mean(loss)
+
+        loss = tf.nn.l2_loss(preds - labels)
+        loss = loss / self.batch_size  # mean per-example loss
+#        loss = tf.reduce_mean(loss)
 
         return preds, loss
+
+
+    def classifier(self, labels, encoder_output, num_classes, reverse_grads=False, name='classifier'):
+        encoder_output_output = encoder_output.outputs
+        encoder_output_output_shape = encoder_output_output.get_shape()
+
+        encoder_output_att_values = encoder_output.attention_values
+        encoder_output_att_values_shape = encoder_output_att_values.get_shape()
+
+        encoder_att_values_length = encoder_output.attention_values_length
+
+        if reverse_grads:
+            encoder_output_output = reverse_grad(encoder_output_output)
+            encoder_output_output.set_shape(encoder_output_output_shape)
+
+            encoder_output_att_values = reverse_grad(encoder_output_att_values)
+            encoder_output_att_values.set_shape(encoder_output_att_values_shape)
+
+        scores, attentional_context = self.run_attention(encoder_output_output,
+                                                         encoder_output_att_values,
+                                                         encoder_att_values_length)
+
+        fc1 = tf.contrib.layers.fully_connected(
+            inputs=attentional_context,
+            num_outputs=self.prediction_hidden_size,
+            activation_fn=tf.nn.tanh,
+            scope='%s_fc' % name)  
+
+        logits = tf.contrib.layers.fully_connected(
+            inputs=fc1,
+            num_outputs=num_classes,
+            activation_fn=None,
+            scope='%s_pred' % name)
+
+        losses = tf.nn.sparse_softmax_cross_entropy_with_logits(
+            logits=logits, labels=labels)
+
+        mean_loss = tf.reduce_mean(losses)
+
+        return logits, mean_loss
+
+
+
+
+
+
 
 
     def encode(self, source, source_len):
@@ -121,12 +218,12 @@ class Model:
         return encoder_output
 
 
-    def run_attention(self, encoder_output):
-        # TODO - reversal here?
-        encoder_output_output = encoder_output.outputs
-        encoder_output_att_values = encoder_output.attention_values
-        encoder_att_values_length = encoder_output.attention_values_length
 
+
+
+    def run_attention(self, encoder_output_output,
+                            encoder_output_att_values,
+                            encoder_att_values_length):
         attention_fn = AttentionLayerDot(num_units=self.num_attention_units)
         normalized_scores, attention_context = attention_fn(
             query=tf.zeros_like(encoder_output_output[:, 0, :]),
@@ -156,7 +253,7 @@ def reverse_grad_grad(op, grad):
     return tf.constant(-1.) * grad
 
 
-@function.Defun(tf.float32, python_grad_function=reverse_grad_grad)
+@function.Defun(tf.float32, python_grad_func=reverse_grad_grad)
 def reverse_grad(tensor):
     return tf.identity(tensor)
 

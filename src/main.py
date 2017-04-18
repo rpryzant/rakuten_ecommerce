@@ -2,7 +2,7 @@ import model
 import utils
 import input_pipeline
 import tensorflow as tf
-
+import os
 
 
 def main():
@@ -21,10 +21,11 @@ def main():
 
     sess.run(tf.global_variables_initializer())    
 
-    (example, lens, sales, price, shop, category)  = next(d.batch_iter())
+#    (example, lens, sales, price, shop, category)  = next(d.batch_iter())
 
     while(True):
-        print m.train_on_batch(example, lens, sales)
+        for (example, lens, sales, price, shop, category) in d.batch_iter():
+            print m.train_on_batch(example, lens, sales, price, shop, category)
 
 
 
