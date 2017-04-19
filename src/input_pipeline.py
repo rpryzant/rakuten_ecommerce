@@ -30,6 +30,10 @@ class DataInputPipeline(object):
     def get_num_shops(self):
         return len(self.shop_to_index)
 
+    def get_num_batches(self):
+        return self.N / float(self.batch_size)
+
+
     def get_num_categories(self):
         return len(self.category_to_index)
 

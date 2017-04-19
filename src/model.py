@@ -94,11 +94,14 @@ class Model:
         self.category_hat = category_logits
         self.train_step = self.optimize(self.loss)
 
+        self.saver = tf.train.Saver()
+
 
     def train_on_batch(self, source, source_len, log_sales, price, shop, category, learning_rate=0.0003):
         """ train the model on a batch of data
         """
-        _, sales_hat, price_hat, shop_hat, category_hat, loss = self.sess.run([self.train_step, self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss],
+        _, sales_hat, price_hat, shop_hat, category_hat, loss = \
+            self.sess.run([self.train_step, self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss],
                                 feed_dict={
                                     self.source: source,
                                     self.source_len: source_len,
@@ -109,7 +112,47 @@ class Model:
                                     self.learning_rate: learning_rate,
                                     self.dropout: self.train_dropout
                                 })
-        return sales_hat.tolist(), log_sales, price_hat.tolist(), price, np.argmax(shop_hat, axis=1).tolist(), shop, np.argmax(category_hat, axis=1).tolist(), category, loss
+        return sales_hat, price_hat, shop_hat, category_hat, loss
+
+
+    def test_on_batch(self, source, source_len, log_sales, price, shop, category):
+        """ runs a forward pass on a batch's worth of data
+        """
+        sales_hat, price_hat, shop_hat, category_hat, loss, attn = \
+            self.sess.run([self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss, self.sales_attn],
+                                feed_dict={
+                                    self.source: source,
+                                    self.source_len: source_len,
+                                    self.log_sales: log_sales,
+                                    self.price: price,
+                                    self.shop: shop,
+                                    self.category: category,
+                                    self.learning_rate: learning_rate,
+                                    self.dropout: self.train_dropout
+                                })        
+
+
+    def save(self, path):
+        """ saves model params at path specified by "path"
+        """ 
+        self.saver.save(self.sess, path, global_step=self.global_step)
+
+
+    def load(self, filepath=None, dir=None):
+        print('INFO: reading checkpoint...')
+        if dir is not None:
+            ckpt = tf.train.get_checkpoint_state(dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                self.saver.restore(self.sess, ckpt.model_checkpoint_path)
+                print 'INFO: success! model restored from %s' % ckpt.model_checkpoint_path
+            else:
+                raise Exception("ERROR: No checkpoint found at ", dir)
+        elif filepath is not None:
+            self.saver.restore(self.sess, filepath)
+            print 'INFO: success! model restored from ', filepath
+        else:
+            raise Exception('ERROR: must provide a checkpoint filepath or directory')
+
 
 
     def optimize(self, loss):

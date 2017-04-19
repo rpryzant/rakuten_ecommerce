@@ -3,9 +3,32 @@ import utils
 import input_pipeline
 import tensorflow as tf
 import os
+import argparse # option parsing
 
 
-def main():
+
+
+def process_command_line():
+    """
+    Return a 1-tuple: (args list).
+    `argv` is a list of arguments, or `None` for ``sys.argv[1:]``.
+    """
+    parser = argparse.ArgumentParser(description='Usage') # add description
+    # positional arguments
+    parser.add_argument('checkpoint', metavar='checkpoint', type=str, help='model directory')
+
+    # optional arguments
+#    parser.add_argument('-c', '--checkpoint', dest='checkpoint', type=str, default=None, help='model directory')
+ 
+    args = parser.parse_args()
+    return args
+
+
+
+
+
+
+def main(model_path):
     c = utils.Config()
     d = input_pipeline.DataInputPipeline(
         '../data/example_data/bag.inputs.bpe',
@@ -21,13 +44,23 @@ def main():
 
     sess.run(tf.global_variables_initializer())    
 
-#    (example, lens, sales, price, shop, category)  = next(d.batch_iter())
-
+    print 'INFO: starting training...'
+    prog = utils.Progbar(target=d.get_num_batches())
+    epoch = 1
     while(True):
-        for (example, lens, sales, price, shop, category) in d.batch_iter():
-            print m.train_on_batch(example, lens, sales, price, shop, category)
-
+        epoch_loss = 0
+        for i, batch in enumerate(d.batch_iter()):
+            sales_hat, price_hat, shop_hat, category_hat, loss = \
+                m.train_on_batch(*batch)
+            prog.update(i, [('train loss', loss)])
+            epoch_loss += loss
+        print 'INFO: EPOCH ', epoch, ' MEAN LOSS: ', epoch_loss / float(d.get_num_batches())
 
 
 if __name__ == '__main__':
-    main()
+    args = process_command_line()
+    main(args.checkpoint)
+
+
+
+
