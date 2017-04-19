@@ -26,9 +26,10 @@ def process_command_line():
 
 
 
-
-
 def main(model_path):
+    if not os.path.exists(model_path):
+        os.mkdir(model_path)
+
     c = utils.Config()
     d = input_pipeline.DataInputPipeline(
         '../data/example_data/bag.inputs.bpe',
@@ -37,12 +38,13 @@ def main(model_path):
         c)
 
     os.environ['CUDA_VISIBLE_DEVICES'] = '1' # Or whichever device you would like to use
-    gpu_options = tf.GPUOptions(allow_growth=True)
-    sess =  tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True))
+#    gpu_options = tf.GPUOptions(allow_growth=True)
+    sess =  tf.Session()#config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True))
 
     m = model.Model(c, sess, d)
 
     sess.run(tf.global_variables_initializer())    
+
 
     print 'INFO: starting training...'
     prog = utils.Progbar(target=d.get_num_batches())
@@ -52,10 +54,12 @@ def main(model_path):
         for i, batch in enumerate(d.batch_iter()):
             sales_hat, price_hat, shop_hat, category_hat, loss = \
                 m.train_on_batch(*batch)
-            prog.update(i, [('train loss', loss)])
+            prog.update(i+1, [('train loss', loss)])
             epoch_loss += loss
-        print 'INFO: EPOCH ', epoch, ' MEAN LOSS: ', epoch_loss / float(d.get_num_batches())
-
+        print '\n INFO: EPOCH ', epoch, ' MEAN LOSS: ', epoch_loss / float(d.get_num_batches())
+        print 'INFO: saving checkpoint...'
+        m.save(model_path)
+        print 'INFO: ...done!'
 
 if __name__ == '__main__':
     args = process_command_line()

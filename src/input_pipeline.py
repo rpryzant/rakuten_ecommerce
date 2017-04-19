@@ -31,7 +31,7 @@ class DataInputPipeline(object):
         return len(self.shop_to_index)
 
     def get_num_batches(self):
-        return self.N / float(self.batch_size)
+        return self.N / self.batch_size
 
 
     def get_num_categories(self):
@@ -39,7 +39,7 @@ class DataInputPipeline(object):
 
     def batch_iter(self):
         i = 0
-        while i + self.batch_size < self.N:
+        for _ in range(self.get_num_batches()):
             example = self.examples[i: i+self.batch_size]
             lens = self.lens[i: i+self.batch_size]
             sales = self.sales[i: i+self.batch_size]

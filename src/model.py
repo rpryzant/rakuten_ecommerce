@@ -6,6 +6,7 @@ from graph_module import GraphModule
 import numpy as np
 import encoders
 import attention
+import os
 
 # # # # global gradient reversal functions  # # # #
 def reverse_grad_grad(op, grad):
@@ -127,15 +128,15 @@ class Model:
                                     self.price: price,
                                     self.shop: shop,
                                     self.category: category,
-                                    self.learning_rate: learning_rate,
-                                    self.dropout: self.train_dropout
+                                    self.dropout: 0.0
                                 })        
-
+        return sales_hat, price_hat, shop_hat, category_hat, loss, attn
 
     def save(self, path):
         """ saves model params at path specified by "path"
         """ 
-        self.saver.save(self.sess, path, global_step=self.global_step)
+        save_path = os.path.join(path, 'model')
+        self.saver.save(self.sess, save_path, global_step=self.global_step)
 
 
     def load(self, filepath=None, dir=None):
