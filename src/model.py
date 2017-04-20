@@ -307,6 +307,8 @@ class Model:
             attention_fn = attention.AttentionLayerDot()
         elif self.attention_type == 'fc':
             attention_fn = attention.AttentionLayerFc()
+        else:
+            raise Exception("unrecognized attention type provided! ", self.attention_type)
 
         normalized_scores, attention_context = attention_fn(
             query=tf.zeros_like(encoder_output_output[:, 0, :]),

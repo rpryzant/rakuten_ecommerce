@@ -1,3 +1,8 @@
+"""
+python inference.py word_vectors-bahdanau/ ../data_wrangling/total.inputs.bpe ../data_wrangling/total.outputs ../data_wrangling/bpe.vocab
+"""
+
+
 import model
 import utils
 import input_pipeline
@@ -16,6 +21,9 @@ def process_command_line():
     parser = argparse.ArgumentParser(description='Usage') # add description
     # positional arguments
     parser.add_argument('checkpoint', metavar='checkpoint', type=str, help='model directory')
+    parser.add_argument('inputs', metavar='inputs', type=str, help='model inputs')
+    parser.add_argument('labels', metavar='labels', type=str, help='model outputs (labels)')
+    parser.add_argument('vocab', metavar='vocab', type=str, help='vocabulary')
 
     # optional arguments
     parser.add_argument('-d', '--dump-attention', action='store_true', help='dump attentional scores and figures')
@@ -23,16 +31,24 @@ def process_command_line():
     args = parser.parse_args()
     return args
 
+def make_config(checkpoint_dir):
+    checkpoint_dir = os.path.basename(os.path.normpath(checkpoint_dir))
+
+    [attention_keys, attention_type] = checkpoint_dir.split('-')
+    c = utils.Config()
+    c.attention_type = attention_type
+    c.attention_keys = attention_keys
+    return c
 
 
 
 def main(model_path):
-    c = utils.Config()
+    c = make_config(args.checkpoint)
     d = input_pipeline.DataInputPipeline(
-        '../data/example_data/bag.inputs.bpe',
-        '../data/example_data/bpe.vocab',
-        '../data/example_data/bag.outputs',
-        c)
+            args.inputs,
+            args.vocab,
+            args.labels,
+            c)
 
     os.environ['CUDA_VISIBLE_DEVICES'] = '1' # Or whichever device you would like to use
 #    gpu_options = tf.GPUOptions(allow_growth=True)
