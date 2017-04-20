@@ -1,6 +1,6 @@
 import tensorflow as tf
 from graph_module import GraphModule
-
+from tensorflow.python.framework import function 
 
 class AttentionLayer(GraphModule):
     """ base layer for attention functionality
@@ -33,7 +33,6 @@ class AttentionLayer(GraphModule):
 
         scores = self.score_fn(att_keys, att_query)
 
-
         # Replace all scores for padded inputs with tf.float32.min
         num_scores = tf.shape(scores)[1]
         scores_mask = tf.sequence_mask(
@@ -41,7 +40,6 @@ class AttentionLayer(GraphModule):
             maxlen=tf.to_int32(num_scores),
             dtype=tf.float32)
         scores = scores * scores_mask + ((1.0 - scores_mask) * tf.float32.min)
-
 
         # Normalize the scores
         scores_normalized = tf.nn.softmax(scores, name="scores_normalized")
@@ -57,10 +55,48 @@ class AttentionLayer(GraphModule):
 
 
 
+
+class AttentionLayerFc(AttentionLayer):
+    """ runs the keys through an entire fc layer
+    """
+    def score_fn(self, keys, query):
+        print keys
+        scores = tf.contrib.layers.fully_connected(
+            inputs=keys,
+            num_outputs=1,
+            activation_fn=None,
+            scope="att_score")
+
+        return tf.squeeze(scores)
+
+
 class AttentionLayerDot(AttentionLayer):
     """ attention according to https://arxiv.org/abs/1508.04025
     """
     def score_fn(self, keys, query):
         """Calculates a batch- and timweise dot product"""
         return tf.reduce_sum(keys * tf.expand_dims(query, 1), [2])
+
+@function.Defun(
+    tf.float32,
+    tf.float32,
+    tf.float32,
+    func_name="att_sum_bahdanau",
+    noinline=True)
+def att_sum_bahdanau(v_att, keys, query):
+    """Calculates a batch- and timweise dot product with a variable"""
+    return tf.reduce_sum(v_att * tf.tanh(keys + tf.expand_dims(query, 1)), [2])
+
+
+class AttentionLayerBahdanau(AttentionLayer):
+    """An attention layer that calculates attention scores using
+        a parameterized multiplication."""
+    def score_fn(self, keys, query):
+        v_att = tf.get_variable(
+            "v_att", shape=[self.num_units], dtype=tf.float32)
+
+        return att_sum_bahdanau(v_att, keys, query)
+
+
+
 

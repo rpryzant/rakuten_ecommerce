@@ -63,26 +63,21 @@ def main(model_path):
 
         # record results
         source, source_len, log_sales, price, shop, category = batch
-#   File "inference.py", line 91, in <module>
-#     main(args.checkpoint)
-#   File "inference.py", line 67, in main
-#     source_out['attn'] += attn
-# ValueError: operands could not be broadcast together with shapes (0,) (128,300) 
-# TODO_______________
+
         source_out['source'] += source
-        source_out['attn'] += attn
+        source_out['attn'] += attn.tolist()
 
         sales_out['label'] += log_sales
-        sales_out['pred'] += sales_hat
+        sales_out['pred'] += sales_hat.tolist()
 
         price_out['label'] += price
-        price_out['pred'] += price_hat
+        price_out['pred'] += price_hat.tolist()
 
         shop_out['label'] += shop
-        shop_out['pred'] += shop_hat
+        shop_out['pred'] += shop_hat.tolist()
 
         category_out['label'] += category
-        category_out['pred'] += category_out
+        category_out['pred'] += category_hat.tolist()
 
         loss_out += loss
 

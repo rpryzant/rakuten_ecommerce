@@ -87,7 +87,7 @@ class DataInputPipeline(object):
                 out_category.append(category_mapping[category])
 
                 example = [self.word_to_index.get(tok, utils.UNK) for tok in line.split()]
-                example = post_pad(example)[::-1]
+                example = post_pad(example)# [::-1]    # reverse for reverse
                 out_examples.append(example)
                 out_lens.append(np.count_nonzero(example))
             except:
@@ -98,7 +98,8 @@ class DataInputPipeline(object):
 
     def reconstruct(self, seq, shop_name=None, category=None):
         text, l = seq
-        return [self.index_to_word.get(x, 'UNK') for x in text][::-1], \
+        # reverse for reverse
+        return [self.index_to_word.get(x, 'UNK') for x in text], \
                 self.index_to_shop.get(shop_name, None), \
                 self.index_to_category.get(category, None)
 

@@ -13,7 +13,7 @@ EncoderOutput = namedtuple(
 class StackedBidirectionalEncoder(GraphModule):
     """ multi-layer bidirectional encoders
     """
-    def __init__(self, cell, name='bidirectional_encoder'):
+    def __init__(self, cell, name='stacked_bidirectional'):
         super(StackedBidirectionalEncoder, self).__init__(name)
         self.cell = cell
 
@@ -38,7 +38,7 @@ class StackedBidirectionalEncoder(GraphModule):
 class BidirectionalEncoder(GraphModule):
     """ single-layer bidirectional encoder
     """
-    def __init__(self, cell, name='default_bidirectional'):
+    def __init__(self, cell, name='bidirectional'):
         super(BidirectionalEncoder, self).__init__(name)
         self.cell = cell
 
@@ -51,11 +51,33 @@ class BidirectionalEncoder(GraphModule):
             dtype=tf.float32)
 
         # Concatenate outputs of the forward and backward RNNs
-        outputs = tf.concat(2, outputs_pre)
+        outputs = tf.concat(outputs_pre, 2)
 
         return EncoderOutput(
             outputs=outputs,
             final_state=final_state,
             attention_values=outputs,
             attention_values_length=lengths)
+
+
+class IdentityEncoder(GraphModule):
+    """ do-nothing encoder
+    """
+    def __init__(self, name='identity'):
+        super(IdentityEncoder, self).__init__(name)
+
+
+    def _build(self, inputs, lengths):
+        return EncoderOutput(
+            outputs=inputs,
+            final_state=tf.zeros_like(inputs[:,0,:]),
+            attention_values=inputs,
+            attention_values_length=lengths)
+
+
+
+
+
+
+
 

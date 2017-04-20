@@ -60,7 +60,7 @@ def main(model_path):
         print 'INFO: saving checkpoint...'
         m.save(model_path)
         print 'INFO: ...done!'
-
+        epoch += 1
 if __name__ == '__main__':
     args = process_command_line()
     main(args.checkpoint)

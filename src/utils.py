@@ -7,20 +7,36 @@ PAD = 0
 UNK = 1
 
 class Config:
-    batch_size = 128
-    max_len = 300
+    # batch_size = 128    
+    # max_len = 300
 
-    embedding_size = 512
-    hidden_size = 256
-    num_layers = 2
-    num_attention_units = 128
-    prediction_hidden_size = 256
+    # embedding_size = 512
+    # hidden_size = 256
+    # num_layers = 2
+    # num_attention_units = 128
+    # prediction_hidden_size = 256
+    # optimizer = 'Adam'
+    # gradient_clip = 5.0
+
+    # learning_rate     = 0.0003    # [1.0 for sgd, 0.0003 for adam] work well
+    # dropout_rate = 0.4
+    batch_size = 2
+    max_len = 400
+
+    embedding_size = 16
+    hidden_size = 32
+    num_layers = 1
+    num_attention_units = 16
+    prediction_hidden_size = 16
     optimizer = 'Adam'
     gradient_clip = 5.0
 
-    learning_rate     = 0.0003    # [1.0 for sgd, 0.0003 for adam] work well
+    learning_rate = 0.0003    # [1.0 for sgd, 0.0003 for adam] work well
     dropout_rate = 0.4
 
+
+    attention_keys = 'word_vectors'        # [rnn_states, word_vectors]
+    attention_type = 'bahdanau'         # [bahdanau, dot, fc]
 
 
 

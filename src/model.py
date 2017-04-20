@@ -38,6 +38,8 @@ class Model:
         self.num_layers = config.num_layers
         self.num_attention_units = config.num_attention_units
         self.prediction_hidden_size = config.prediction_hidden_size
+        self.attention_type = config.attention_type
+        self.attention_keys = config.attention_keys
 
         # optimization config
         self.optimizer = config.optimizer
@@ -264,6 +266,7 @@ class Model:
             source_embedded = self.get_embeddings(self.source)
         with tf.variable_scope('encoder'):
             encoder_output = self.run_encoder(source_embedded, self.source_len)
+
         return encoder_output
 
 
@@ -280,7 +283,14 @@ class Model:
         """ runs the source embeddings through an encoder
         """
         cell = self.build_rnn_cell()
-        encoder = encoders.StackedBidirectionalEncoder(cell)
+
+        if self.attention_keys == 'word_vectors':
+            encoder = encoders.IdentityEncoder()
+        elif self.num_layers == 1:
+            encoder = encoders.BidirectionalEncoder(cell)
+        else:
+            encoder = encoders.StackedBidirectionalEncoder(cell)
+
         encoder_output = encoder(source, source_len)
         return encoder_output
 
@@ -290,7 +300,14 @@ class Model:
                             encoder_att_values_length):
         """ sends the encoder outputs through an attentional layer
         """
-        attention_fn = attention.AttentionLayerDot(num_units=self.num_attention_units)
+
+        if self.attention_type == 'bahdanau':
+            attention_fn = attention.AttentionLayerBahdanau(num_units=self.num_attention_units)
+        elif self.attention_type == 'dot':
+            attention_fn = attention.AttentionLayerDot()
+        elif self.attention_type == 'fc':
+            attention_fn = attention.AttentionLayerFc()
+
         normalized_scores, attention_context = attention_fn(
             query=tf.zeros_like(encoder_output_output[:, 0, :]),
             keys=encoder_output_output,
@@ -306,6 +323,9 @@ class Model:
         cell = tf.contrib.rnn.BasicLSTMCell(self.hidden_size, state_is_tuple=True)
         cell = tf.contrib.rnn.DropoutWrapper(cell,
                                              input_keep_prob=(1 - self.dropout))
+        if self.num_layers == 1:
+            return cell
+
         stacked_cell = tf.contrib.rnn.MultiRNNCell([cell] * self.num_layers,
                                                    state_is_tuple=True)
         return stacked_cell
