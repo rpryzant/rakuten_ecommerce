@@ -1,7 +1,3 @@
-"""
-TODO 
-   - build attention function beforehand, but still reverse underlying gradients
-"""
 
 import tensorflow as tf
 from tensorflow.python.framework import function
@@ -46,6 +42,7 @@ class Model:
         self.prediction_hidden_size = config.prediction_hidden_size
         self.attention_type = config.attention_type
         self.attention_keys = config.attention_keys
+        self.attention_order = config.attention_order
 
         # optimization config
         self.optimizer = config.optimizer
@@ -70,18 +67,26 @@ class Model:
         # encode the source
         source_encoding = self.encode(self.source, self.source_len)
 
+        # if config.attention_order == before_split, make prediction heads
+        #   share the same attention graph
+        attention_fn = None
+        if self.attention_order == 'before_split':
+            attention_fn = self.build_attention_fn()
+
         # run the encoding through each prediction head
         with tf.variable_scope('sales'):
             self.sales_hat, self.sales_loss, self.sales_attn = self.regressor(
                 self.log_sales,
                 source_encoding, 
                 reverse_grads=False, 
+                attention_fn=attention_fn,
                 name='sales')
         with tf.variable_scope('price'):
             self.price_hat, self.price_loss, self.price_attn = self.regressor(
                 self.price, 
                 source_encoding, 
                 reverse_grads=True, 
+                attention_fn=attention_fn,
                 name='price')
         with tf.variable_scope('shop'):
             self.shop_hat, self.shop_loss, self.shop_attn = self.classifier(
@@ -89,6 +94,7 @@ class Model:
                 source_encoding, 
                 num_classes=self.num_shops,
                 reverse_grads=True, 
+                attention_fn=attention_fn,
                 name='shop')
         with tf.variable_scope('category'):
             self.category_hat, self.category_loss, self.category_attn = self.classifier(
@@ -96,6 +102,7 @@ class Model:
                 source_encoding, 
                 num_classes=self.num_categories,
                 reverse_grads=True, 
+                attention_fn=attention_fn,
                 name='category')
 
         # get everything nice and tidy 
@@ -107,6 +114,7 @@ class Model:
     def train_on_batch(self, source, source_len, log_sales, price, shop, category, learning_rate=0.0003):
         """ train the model on a batch of data
         """
+        print 'HERE!!!!!!'
         _, sales_hat, price_hat, shop_hat, category_hat, loss = \
             self.sess.run([self.train_step, self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss],
                                 feed_dict={
@@ -119,6 +127,11 @@ class Model:
                                     self.learning_rate: learning_rate,
                                     self.dropout: self.train_dropout
                                 })
+        print sales_hat[0], log_sales[0]
+        print price_hat[0], price[0]
+        print
+        print
+
         return sales_hat, price_hat, shop_hat, category_hat, loss
 
 
@@ -139,6 +152,7 @@ class Model:
                                     self.dropout: 0.0
                                 })        
         return sales_hat, price_hat, shop_hat, category_hat, loss, attn
+
 
     def save(self, path):
         """ saves model params at path specified by "path"
@@ -177,7 +191,7 @@ class Model:
         return train_op
 
 
-    def regressor(self, labels, encoder_output, reverse_grads=False, name='regressor'):
+    def regressor(self, labels, encoder_output, reverse_grads=False, attention_fn=None, name='regressor'):
         """ attach a pair of fc layers to encoder_output and predict labels
             optionally reverse gradient flow into the encoder
         """
@@ -197,9 +211,13 @@ class Model:
             encoder_output_att_values = reverse_grad(encoder_output_att_values)
             encoder_output_att_values.set_shape(encoder_output_att_values_shape)
 
-        scores, attentional_context = self.run_attention(encoder_output_output,
-                                                         encoder_output_att_values,
-                                                         encoder_att_values_length)
+        attention_fn = self.build_attention_fn() if attention_fn is None else attention_fn
+        scores, attentional_context = attention_fn(
+            query=tf.zeros_like(encoder_output_output[:, 0, :]),
+            keys=encoder_output_output,
+            values=encoder_output_att_values,
+            values_length=encoder_att_values_length)
+
         # fc to hidden
         fc1 = tf.contrib.layers.fully_connected(
             inputs=attentional_context,
@@ -221,7 +239,7 @@ class Model:
         return preds, loss, scores
 
 
-    def classifier(self, labels, encoder_output, num_classes, reverse_grads=False, name='classifier'):
+    def classifier(self, labels, encoder_output, num_classes, reverse_grads=False, attention_fn=None, name='classifier'):
         """ attach a pair of fc layers to encoder_output and predict labels
             optionally reverse gradient flow into the encoder
         """
@@ -241,9 +259,13 @@ class Model:
             encoder_output_att_values = reverse_grad(encoder_output_att_values)
             encoder_output_att_values.set_shape(encoder_output_att_values_shape)
 
-        scores, attentional_context = self.run_attention(encoder_output_output,
-                                                         encoder_output_att_values,
-                                                         encoder_att_values_length)
+        attention_fn = self.build_attention_fn() if attention_fn is None else attention_fn
+        scores, attentional_context = attention_fn(
+            query=tf.zeros_like(encoder_output_output[:, 0, :]),
+            keys=encoder_output_output,
+            values=encoder_output_att_values,
+            values_length=encoder_att_values_length)
+
         # fc to hidden
         fc1 = tf.contrib.layers.fully_connected(
             inputs=attentional_context,
@@ -301,12 +323,7 @@ class Model:
         return encoder_output
 
 
-    def run_attention(self, encoder_output_output,
-                            encoder_output_att_values,
-                            encoder_att_values_length):
-        """ sends the encoder outputs through an attentional layer
-        """
-
+    def build_attention_fn(self):
         if self.attention_type == 'bahdanau':
             attention_fn = attention.AttentionLayerBahdanau(num_units=self.num_attention_units)
         elif self.attention_type == 'dot':
@@ -315,14 +332,7 @@ class Model:
             attention_fn = attention.AttentionLayerFc()
         else:
             raise Exception("unrecognized attention type provided! ", self.attention_type)
-
-        normalized_scores, attention_context = attention_fn(
-            query=tf.zeros_like(encoder_output_output[:, 0, :]),
-            keys=encoder_output_output,
-            values=encoder_output_att_values,
-            values_length=encoder_att_values_length)
-
-        return normalized_scores, attention_context
+        return attention_fn
 
 
     def build_rnn_cell(self):
