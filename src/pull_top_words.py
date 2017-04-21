@@ -8,3 +8,22 @@ TODO - REDO THIS SCRIPT
                                      ${key}-${type}-${size}/choco-worst-${key}-${type}-${size}
 
 """
+
+
+
+
+
+
+
+# parse inference output
+
+# intersect with targets
+
+# standardize attention scores
+
+# rm dup words (keep best score)
+
+# sort words by associated score
+
+# give best & worst words
+
