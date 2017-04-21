@@ -25,7 +25,9 @@ class SmallConfig:
 
     attention_keys = 'word_vectors'        # [rnn_states, word_vectors]
     attention_type = 'bahdanau'         # [bahdanau, dot, fc]
-
+    attention_order = 'before_split'    # [before_split, after_split]
+    reverse_gradients = True
+    mixing_ratio = 0.5         # how much of loss comes from sales
 
 
 class MediumConfig:
@@ -47,6 +49,10 @@ class MediumConfig:
 
     attention_keys = 'word_vectors'        # [rnn_states, word_vectors]
     attention_type = 'bahdanau'         # [bahdanau, dot, fc]
+    attention_order = 'before_split'    # [before_split, after_split]
+
+    mixing_ratio = 0.5         # how much of loss comes from sales
+
 
 
 class LargeConfig:
@@ -68,6 +74,7 @@ class LargeConfig:
 
     attention_keys = 'word_vectors'        # [rnn_states, word_vectors]
     attention_type = 'bahdanau'         # [bahdanau, dot, fc]
+    attention_order = 'before_split'    # [before_split, after_split]
 
 
 

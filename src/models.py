@@ -48,6 +48,8 @@ class Model:
         self.optimizer = config.optimizer
         self.gradient_clip = config.gradient_clip
         self.train_dropout = config.dropout_rate
+        self.mixing_ratio = config.mixing_ratio
+        self.reverse_gradients = config.reverse_gradients
 
         # training
         self.learning_rate = tf.placeholder(tf.float32, shape=(), name='lr')
@@ -85,7 +87,7 @@ class Model:
             self.price_hat, self.price_loss, self.price_attn = self.regressor(
                 self.price, 
                 source_encoding, 
-                reverse_grads=True, 
+                reverse_grads=self.reverse_gradients, 
                 attention_fn=attention_fn,
                 name='price')
         with tf.variable_scope('shop'):
@@ -93,7 +95,7 @@ class Model:
                 self.shop, 
                 source_encoding, 
                 num_classes=self.num_shops,
-                reverse_grads=True, 
+                reverse_grads=self.reverse_gradients, 
                 attention_fn=attention_fn,
                 name='shop')
         with tf.variable_scope('category'):
@@ -101,12 +103,13 @@ class Model:
                 self.category, 
                 source_encoding, 
                 num_classes=self.num_categories,
-                reverse_grads=True, 
+                reverse_grads=self.reverse_gradients, 
                 attention_fn=attention_fn,
                 name='category')
 
         # get everything nice and tidy 
-        self.loss = self.sales_loss + self.price_loss + self.shop_loss + self.category_loss
+        self.loss = self.mixing_ratio * self.sales_loss + \
+                ((1 - self.mixing_ratio) * self.price_loss + self.shop_loss + self.category_loss)
         self.train_step = self.optimize(self.loss)
         self.saver = tf.train.Saver()
 
@@ -127,11 +130,6 @@ class Model:
                                     self.learning_rate: learning_rate,
                                     self.dropout: self.train_dropout
                                 })
-        print sales_hat[0], log_sales[0]
-        print price_hat[0], price[0]
-        print
-        print
-
         return sales_hat, price_hat, shop_hat, category_hat, loss
 
 
@@ -198,16 +196,13 @@ class Model:
         # TODO - this is repeated wit hclassifier. find out if safe to abstract?
         encoder_output_output = encoder_output.outputs
         encoder_output_output_shape = encoder_output_output.get_shape()
-
         encoder_output_att_values = encoder_output.attention_values
         encoder_output_att_values_shape = encoder_output_att_values.get_shape()
-
         encoder_att_values_length = encoder_output.attention_values_length
 
         if reverse_grads:
             encoder_output_output = reverse_grad(encoder_output_output)
             encoder_output_output.set_shape(encoder_output_output_shape)
-
             encoder_output_att_values = reverse_grad(encoder_output_att_values)
             encoder_output_att_values.set_shape(encoder_output_att_values_shape)
 
@@ -246,16 +241,13 @@ class Model:
         # TODO - this is repeated with regressor. find out if safe to abstract?
         encoder_output_output = encoder_output.outputs
         encoder_output_output_shape = encoder_output_output.get_shape()
-
         encoder_output_att_values = encoder_output.attention_values
         encoder_output_att_values_shape = encoder_output_att_values.get_shape()
-
         encoder_att_values_length = encoder_output.attention_values_length
 
         if reverse_grads:
             encoder_output_output = reverse_grad(encoder_output_output)
             encoder_output_output.set_shape(encoder_output_output_shape)
-
             encoder_output_att_values = reverse_grad(encoder_output_att_values)
             encoder_output_att_values.set_shape(encoder_output_att_values_shape)
 
