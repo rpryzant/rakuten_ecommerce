@@ -1,3 +1,7 @@
+"""
+TODO 
+   - build attention function beforehand, but still reverse underlying gradients
+"""
 
 import tensorflow as tf
 from tensorflow.python.framework import function
