@@ -1,6 +1,8 @@
 """
 python pull_top_words.py rnn_states-bahdanau-small/out.pkl ../data_wrangling/choco_multi_candid3.txt ../data_wrangling/bpe.vocab rnn_states-bahdanau-small/test_best rnn_states-bahdanau-small/test_worst
 
+TODO: - MULTIPLE ATTENTIONS, TAKE DIF
+
 """
 from collections import defaultdict
 import sys

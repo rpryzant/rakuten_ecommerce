@@ -62,7 +62,7 @@ def main(args):
     if not os.path.exists(args.checkpoint):
         os.mkdir(args.checkpoint)
 
-    c = make_config(args)
+    c = utils.make_config(args)
 
 
     d = input_pipeline.DataInputPipeline(
@@ -96,7 +96,7 @@ def main(args):
         print 'INFO: ...done!'
         epoch += 1
 if __name__ == '__main__':
-    args = process_command_line()
+    args = utils.process_command_line()
     main(args)
 
 

@@ -50,8 +50,6 @@ def write_pickle(o, fname):
 
 
 def make_config(args):
-#    checkpoint_dir = os.path.basename(os.path.normpath(checkpoint_dir))
-#    [attention_keys, attention_type] = checkpoint_dir.split('-')
     print args
     if args.model_size == 'small':
         c = utils.SmallConfig()
@@ -69,7 +67,7 @@ def make_config(args):
 
 
 def main(args):
-    c = make_config(args)
+    c = utils.make_config(args)
     d = input_pipeline.DataInputPipeline(
             args.inputs,
             args.vocab,
@@ -135,7 +133,7 @@ def main(args):
 
 
 if __name__ == '__main__':
-    args = process_command_line()
+    args = utils.process_command_line()
     main(args)
 
 
