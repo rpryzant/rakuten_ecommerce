@@ -1,3 +1,9 @@
+"""
+TODO - 2 layer for fc?
+     - rm scoring
+"""
+
+
 import tensorflow as tf
 from graph_module import GraphModule
 from tensorflow.python.framework import function 
