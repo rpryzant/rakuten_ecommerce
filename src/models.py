@@ -18,6 +18,8 @@ def reverse_grad(tensor):
 # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 
+
+
 class Model:
     """
     multi-headed model for adversarial discriminative prediction
@@ -66,37 +68,35 @@ class Model:
 
         # run the encoding through each prediction head
         with tf.variable_scope('sales'):
-            sales_hat, sales_loss, attn_scores = self.regressor(self.log_sales,
-                                                                source_encoding, 
-                                                                reverse_grads=False, 
-                                                                name='sales')
+            self.sales_hat, self.sales_loss, self.sales_attn = self.regressor(
+                self.log_sales,
+                source_encoding, 
+                reverse_grads=False, 
+                name='sales')
         with tf.variable_scope('price'):
-            price_hat, price_loss, _ = self.regressor(self.price, 
-                                                      source_encoding, 
-                                                      reverse_grads=True, 
-                                                      name='price')
+            self.price_hat, self.price_loss, self.price_attn = self.regressor(
+                self.price, 
+                source_encoding, 
+                reverse_grads=True, 
+                name='price')
         with tf.variable_scope('shop'):
-            shop_logits, shop_loss, _ = self.classifier(self.shop, 
-                                                        source_encoding, 
-                                                        num_classes=self.num_shops,
-                                                        reverse_grads=True, 
-                                                        name='shop')
+            self.shop_hat, self.shop_loss, self.shop_attn = self.classifier(
+                self.shop, 
+                source_encoding, 
+                num_classes=self.num_shops,
+                reverse_grads=True, 
+                name='shop')
         with tf.variable_scope('category'):
-            category_logits, category_loss, _ = self.classifier(self.category, 
-                                                                source_encoding, 
-                                                                num_classes=self.num_categories,
-                                                                reverse_grads=True, 
-                                                                name='category')
+            self.category_hat, self.category_loss, self.category_attn = self.classifier(
+                self.category, 
+                source_encoding, 
+                num_classes=self.num_categories,
+                reverse_grads=True, 
+                name='category')
 
         # get everything nice and tidy 
-        self.loss = sales_loss + price_loss + shop_loss + category_loss
-        self.sales_hat = sales_hat
-        self.sales_attn = attn_scores
-        self.price_hat = price_hat
-        self.shop_hat = shop_logits
-        self.category_hat = category_logits
+        self.loss = self.sales_loss + self.price_loss + self.shop_loss + self.category_loss
         self.train_step = self.optimize(self.loss)
-
         self.saver = tf.train.Saver()
 
 
@@ -121,8 +121,10 @@ class Model:
     def test_on_batch(self, source, source_len, log_sales, price, shop, category):
         """ runs a forward pass on a batch's worth of data
         """
-        sales_hat, price_hat, shop_hat, category_hat, loss, attn = \
-            self.sess.run([self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss, self.sales_attn],
+        sales_hat, price_hat, shop_hat, category_hat, loss, attn, a2, a3, a4 = \
+            self.sess.run([self.sales_hat, self.price_hat, self.shop_hat,
+                            self.category_hat, self.loss, self.sales_attn,
+                            self.price_attn, self.shop_attn, self.category_attn],
                                 feed_dict={
                                     self.source: source,
                                     self.source_len: source_len,

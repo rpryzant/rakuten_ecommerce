@@ -1,5 +1,5 @@
 """
-python process_data.py ../data/bag_desc/ ../data/bag_sales.txt
+python process_data.py ../data/
 """
 import pandas as pd
 import sys
@@ -41,7 +41,7 @@ for category in categories:
         item_description = re.sub('\s+', ' ', item_title + ' ' + description1 + ' ' + description2).strip()
 
         inputs += item_description + '\n'
-        outputs += '%s|%s|%s|%s\n' % (str(math.log(float(sales + 0.00001))), shop_name, price, category)
+        outputs += '%s|%s|%s|%s|%s\n' % (str(math.log(float(sales + 0.00001))), shop_name, price, category, item_id)
 
 
     with open(category + '.inputs', 'w') as f:

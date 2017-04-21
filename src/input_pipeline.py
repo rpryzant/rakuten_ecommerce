@@ -12,7 +12,7 @@ class DataInputPipeline(object):
 
         # todo - refactor
         self.broken, self.sales, self.shop, self.price, \
-            self.category, self.examples, self.lens, \
+            self.category, self.ids, self.examples, self.lens, \
             self.shop_to_index, self.category_to_index = \
                 self.prepare_data(labels, text)
 
@@ -46,8 +46,8 @@ class DataInputPipeline(object):
             price = self.price[i: i+self.batch_size]
             shop = self.shop[i: i+self.batch_size]
             category = self.category[i: i+self.batch_size]
-
-            yield example, lens, sales, price, shop, category
+            ids = self.ids[i: i + self.batch_size]
+            yield example, lens, sales, price, shop, category, ids
 
             i += self.batch_size
 
@@ -65,6 +65,7 @@ class DataInputPipeline(object):
         parse = []
         for i, l in enumerate(open(f)):
             parse.append(l.strip().split('|'))
+        parse = filter(lambda x: len(x) > 2, parse)
 
         shop_names = set(x[1] for x in parse)
         categories = set(x[3] for x in parse)
@@ -79,8 +80,12 @@ class DataInputPipeline(object):
         out_category = []
         out_examples = []
         out_lens = []
-        for i, ([log_sales, shop_name, price, category], line) in enumerate(zip(parse, open(text))):
+        out_ids = []
+        for i, ([log_sales, shop_name, price, category, item_id], line) in \
+            enumerate(zip(parse, open(text))):
+
             try:
+                out_ids.append(item_id)
                 out_sales.append(float(log_sales))
                 out_shop.append(shop_name_mapping[shop_name])
                 out_price.append(math.log(float(price)))
@@ -92,7 +97,7 @@ class DataInputPipeline(object):
                 out_lens.append(np.count_nonzero(example))
             except:
                 broken.append(i)
-        return broken, out_sales, out_shop, out_price, out_category, \
+        return broken, out_sales, out_shop, out_price, out_category, out_ids, \
                 out_examples, out_lens, shop_name_mapping, category_mapping
 
 
@@ -107,8 +112,8 @@ class DataInputPipeline(object):
     def parse_vocab(self, f):
         d = {}
         for i, l in enumerate(open(f)):
-            d[l.split()[0]] = i + 2      # +1 to reserve 0 for pad, 1 for unk
-        d[1] = 'UNK'
+            d[l.split()[0]] = i + 2      # +2 to reserve 0 for pad, 1 for unk
+        d['UNK'] = 1
         return d
 
 

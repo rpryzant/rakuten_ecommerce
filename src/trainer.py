@@ -43,11 +43,11 @@ def process_command_line():
 
 
 def make_config(args):
-    if args.size == 'small':
+    if args.model_size == 'small':
         c = utils.SmallConfig()
-    elif args.size == 'medium':
+    elif args.model_size == 'medium':
         c = utils.MediumConfig()
-    elif args.size == 'large':
+    elif args.model_size == 'large':
         c = utils.LargeConfig()
 
     if args.attention_type is not None:
@@ -87,7 +87,7 @@ def main(args):
         epoch_loss = 0
         for i, batch in enumerate(d.batch_iter()):
             sales_hat, price_hat, shop_hat, category_hat, loss = \
-                m.train_on_batch(*batch)
+                m.train_on_batch(*batch[:-1])
             prog.update(i+1, [('train loss', loss)])
             epoch_loss += loss
         print '\n INFO: EPOCH ', epoch, ' MEAN LOSS: ', epoch_loss / float(d.get_num_batches())
