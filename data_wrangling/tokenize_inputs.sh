@@ -1,4 +1,4 @@
-
+# ./tokenize_inputs.sh total.inputs
 CORPUS=$1
 
 # learn BPE
