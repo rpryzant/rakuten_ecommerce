@@ -83,11 +83,11 @@ class Config:
     batch_size = 128
     max_len = 400
 
-    embedding_size = 16
-    hidden_size = 16
+    embedding_size = 32
+    hidden_size = 32
     num_layers = 1
-    num_attention_units = 16
-    prediction_hidden_size = 16
+    num_attention_units = 32
+    prediction_hidden_size = 32
     optimizer = 'Adam'
     gradient_clip = 5.0
 

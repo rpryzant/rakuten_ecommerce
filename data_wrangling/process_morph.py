@@ -1,5 +1,5 @@
 """
-python process_morph.py ../data/bpe_small/total.outputs ../data/raw_morph_2/ total.inputs.morph total.outputs
+python process_morph.py ../data/bpe_small/total.outputs ../data/raw_morph/ total.inputs.morph total.outputs
 
 python process_morph.py [output file] [morph root dir]
                         e.g. bpe_small/total.outputs
@@ -47,7 +47,7 @@ def extract_text(path):
     out = ''
     for line in open(path):
         try:
-            token = line.strip().split('\t')[1].replace(' ', '').replace('\n', '')
+            token = line.strip().split('\t')[1].replace(' ', '')
             if not token.isdigit() and not token.lower() == 'EOF' and not mostly_english(token):
                 out += ' ' + token
         except:
