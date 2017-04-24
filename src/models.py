@@ -71,7 +71,9 @@ class Model:
 
         # if config.attention_order == before_split, make prediction heads
         #   share the same attention graph
-        attention_fn = None
+        # TODO -- this precludes tf from reading checkpoints for some 
+        #          reason???
+        self.attention_fn = None
         if self.attention_order == 'before_split':
             attention_fn = self.build_attention_fn()
 

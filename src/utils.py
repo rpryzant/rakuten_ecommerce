@@ -2,6 +2,7 @@ import time
 import sys
 import numpy as np
 import argparse # option parsing
+import cPickle
 
 
 PAD = 0
@@ -48,11 +49,19 @@ def process_command_line():
         help='num attentional units')
     parser.add_argument('-ph', '--prediction-units', dest='prediction_units', type=int, default=32, 
         help='num prediction hidden units')
-    parser.add_argument('-e', '--epochs', dest='epochs', type=int, default=14, 
+    parser.add_argument('-e', '--epochs', dest='epochs', type=int, default=3, 
         help='num training epochs')
     
     args = parser.parse_args()
     return args
+
+
+
+
+
+def write_pickle(o, fname):
+    with open(fname, 'w') as f:
+        cPickle.dump(o, f, -1)
 
 
 

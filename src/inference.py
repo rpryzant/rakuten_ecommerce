@@ -1,6 +1,9 @@
 """
 python inference.py -o rnn_states-bahdanau-large/out.pkl -t bahdanau -k rnn_states, -s large -g 1 rnn_states-bahdanau-large/ ../data_wrangling/total.inputs.bpe ../data_wrangling/total.outputs ../data_wrangling/bpe.vocab
 
+
+NOTE -- this is DEPRECIATED, because before_split attention
+            precludes tf from reading in checkpints???
 """
 
 import cPickle

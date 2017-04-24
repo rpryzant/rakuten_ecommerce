@@ -2,7 +2,7 @@
 python trainer.py test ../data_wrangling/total.inputs.bpe ../data_wrangling/total.outputs ../data_wrangling/bpe.vocab
 """
 
-
+import cPickle
 import model
 import utils
 import input_pipeline
@@ -35,7 +35,6 @@ def main(args):
 
     sess.run(tf.global_variables_initializer())    
 
-
     print 'INFO: starting training...'
     prog = utils.Progbar(target=d.get_num_batches())
     epoch = 1
@@ -51,6 +50,60 @@ def main(args):
         m.save(args.checkpoint)
         print 'INFO: ...done!'
         epoch += 1
+
+
+
+    print 'INFO: starting inference...'
+    prog = utils.Progbar(target=d.get_num_batches())
+
+    source_out = {'source': [], 'len': [], 'attn': [], 'ids': []}
+    sales_out = {'label': [], 'pred': []}
+    price_out = {'label': [], 'pred': []}
+    shop_out = {'label': [], 'pred': []}
+    category_out = {'label': [], 'pred': []}
+    loss_out = []
+
+    for i, batch in enumerate(d.batch_iter()):
+        sales_hat, price_hat, shop_hat, category_hat, loss, attn = \
+            m.test_on_batch(*batch[:-1]) 
+
+        prog.update(i, [('train loss', loss)])
+
+        # record results
+        source, source_len, log_sales, price, shop, category, ids = batch
+
+        source_out['source'] += source
+        source_out['len'] += source_len
+        source_out['attn'] += attn.tolist()
+        source_out['ids'] += ids
+
+        sales_out['label'] += log_sales
+        sales_out['pred'] += sales_hat.tolist()
+
+        price_out['label'] += price
+        price_out['pred'] += price_hat.tolist()
+
+        shop_out['label'] += shop
+        shop_out['pred'] += shop_hat.tolist()
+
+        category_out['label'] += category
+        category_out['pred'] += category_hat.tolist()
+
+        loss_out += loss
+
+    if args.output is not None:
+        print '\nINFO: dumping output to ', args.output
+        utils.write_pickle(source_out, args.output)
+
+    print 'INFO:  done \(^o^)/'
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     args = utils.process_command_line()
     main(args)

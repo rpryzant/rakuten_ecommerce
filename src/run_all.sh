@@ -1,18 +1,21 @@
-# ./run_all.sh ../data_wrangling/ 2
+#  ./run_all.sh ../data/morph_small/ ../data/labels/ 1 MORPH > MORPH_OUT 2> MORPH_ERR
+#  ./run_all.sh ../data/bpe_small/ ../data/labels/ 2 BPE > BPE_OUT 2> BPE_ERR
 
 DATA=$1
-GPU=$2
-OUT=$3
+TARGETS=$2
+GPU=$3
+OUT=$4
 
 mkdir ${OUT}
 
 # run all combos
 for wv_size in 16 32 64; do
     for reverse in True False; do
-        for key in rnn_states word_vectors; do
+        for key in word_vectors rnn_states; do
             for type in bahdanau; do
                 for order in before_split after_split; do
-                    OUT_DIR=${OUT}/${key}-${type}-${reverse}-${order}-${wv-size}
+                    SETTINGS=${key}-${type}-reverse_${reverse}-${order}-wv_size_${wv_size}
+                    OUT_DIR=${OUT}/${SETTINGS}
                     echo 'INFO: starting '${OUT_DIR}
                     python trainer.py ${OUT_DIR} \
                                       ${DATA}/total.inputs \
@@ -22,28 +25,31 @@ for wv_size in 16 32 64; do
                                       --attention-keys ${key} \
                                       --attention-order ${order} \
                                       --gpu ${GPU} \
-                                      --reverse-gradients ${reverse}
-                                      --embedding-size ${wv_size}
-                    python inference.py ${OUT_DIR} \
-                                        ${DATA}/total.inputs \
-                                        ${DATA}/total.outputs ${DATA}/vocab \
-                                        --attention-type ${type} \
-                                        --attention-keys ${key} \
-                                        --attention-order ${order} \
-                                        --gpu ${GPU} \
-                                        --output ${OUT_DIR}/out.pkl 
-                                        --reverse-gradients ${reverse}
-                                        --embedding-size ${wv_size}
-                    python pull_top_words.py ${key}-${type}-${reverse}/out.pkl \
-                                             ${DATA}/health_multi_candid3.txt \
-                                             ${DATA}/vocab \
-                                             ${OUT_DIR}/health-best-${OUT_DIR} \
-                                             ${OUT_DIR}/health-worst-${OUT_DIR}
+                                      --reverse-gradients ${reverse} \
+                                      --embedding-size ${wv_size} \
+                                      --output ${OUT_DIR}/out.pkl 
+
+                    # python inference.py ${OUT_DIR} \
+                    #                     ${DATA}/total.inputs \
+                    #                     ${DATA}/total.outputs \
+                    #                     ${DATA}/vocab \
+                    #                     --attention-type ${type} \
+                    #                     --attention-keys ${key} \
+                    #                     --attention-order ${order} \
+                    #                     --gpu ${GPU} \
+                    #                     --reverse-gradients ${reverse} \
+                    #                     --embedding-size ${wv_size} \
+                    #                     --output ${OUT_DIR}/out.pkl 
                     python pull_top_words.py ${OUT_DIR}/out.pkl \
-                                             ${DATA}/choco_multi_candid3.txt \
+                                             ${TARGETS}/health_multi_candid3.txt \
                                              ${DATA}/vocab \
-                                             ${OUT_DIR}/choco-best-${OUT_DIR} \
-                                             ${OUT_DIR}/choco-worst-${OUT_DIR}
+                                             ${OUT_DIR}/health-best-${SETTINGS} \
+                                             ${OUT_DIR}/health-worst-${SETTINGS}
+                    python pull_top_words.py ${OUT_DIR}/out.pkl \
+                                             ${TARGETS}/choco_multi_candid3.txt \
+                                             ${DATA}/vocab \
+                                             ${OUT_DIR}/choco-best-${SETTINGS} \
+                                             ${OUT_DIR}/choco-worst-${SETTINGS}
                 done
             done
         done
@@ -52,10 +58,10 @@ done
 
 # run baselines
 python pull_random_words.py rnn_states-bahdanau-large/out.pkl \
-                            ../data/labels/health_multi_candid3.txt \
-                            ../data_wrangling/vocab \
-                            ${OUT}/health-random_baseline
+                            ${TARGETS}/health_multi_candid3.txt \
+                            ${DATA}/vocab \
+                            ${OUT_DIR}/health-random_baseline
 python pull_random_words.py rnn_states-bahdanau-large/out.pkl \
-                            ../data/labels/choco_multi_candid3.txt \
-                            ../data_wrangling/vocab \
-                            ${OUT}/choco-random_baseline
+                            ${TARGETS}/choco_multi_candid3.txt \
+                            ${DATA}/vocab \
+                            ${OUT_DIR}/choco-random_baseline
