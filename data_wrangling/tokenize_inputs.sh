@@ -5,7 +5,7 @@ CORPUS=$1
 spm_train \
   --input=${CORPUS} \
   --model_prefix=bpe \
-  --vocab_size=20000 \
+  --vocab_size=16000 \
   --model_type=bpe
 
 # apply BPE
