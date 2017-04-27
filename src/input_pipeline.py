@@ -82,7 +82,7 @@ class DataInputPipeline(object):
         out_lens = []
         out_ids = []
         #                                             , item_id]
-        for i, ([log_sales, shop_name, price, category], line) in \
+        for i, ([log_sales, shop_name, price, category, item_id], line) in \
             enumerate(zip(parse, open(text))):
 
             try:

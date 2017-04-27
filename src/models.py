@@ -1,4 +1,6 @@
-
+"""
+TODO - batch norm as CLI flag
+"""
 import tensorflow as tf
 from tensorflow.python.framework import function
 from tensorflow.contrib.rnn.python.ops import rnn

@@ -67,7 +67,7 @@ class AttentionLayerFc(AttentionLayer):
             scope="att_hidden")
 
         scores = tf.contrib.layers.fully_connected(
-            inputs=fc1,
+            inputs=fc,
             num_outputs=1,
             activation_fn=None,
             scope='att_score')
