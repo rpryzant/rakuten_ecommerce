@@ -57,14 +57,20 @@ class AttentionLayer(GraphModule):
 
 
 class AttentionLayerFc(AttentionLayer):
-    """ runs the keys through an entire fc layer
+    """ runs the keys through an a pair of fc layers
     """
     def score_fn(self, keys, query):
-        scores = tf.contrib.layers.fully_connected(
+        fc = tf.contrib.layers.fully_connected(
             inputs=keys,
+            num_outputs=self.num_units,
+            activation_fn=tf.nn.relu,
+            scope="att_hidden")
+
+        scores = tf.contrib.layers.fully_connected(
+            inputs=fc1,
             num_outputs=1,
             activation_fn=None,
-            scope="att_score")
+            scope='att_score')
 
         return tf.squeeze(scores)
 

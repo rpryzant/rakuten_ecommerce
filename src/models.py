@@ -219,7 +219,7 @@ class Model:
         fc1 = tf.contrib.layers.fully_connected(
             inputs=attentional_context,
             num_outputs=self.prediction_hidden_size,
-            activation_fn=tf.nn.tanh,
+            activation_fn=tf.nn.relu,
             scope='%s_fc' % name)  
         # fc to preds
         preds = tf.contrib.layers.fully_connected(
@@ -264,7 +264,7 @@ class Model:
         fc1 = tf.contrib.layers.fully_connected(
             inputs=attentional_context,
             num_outputs=self.prediction_hidden_size,
-            activation_fn=tf.nn.tanh,
+            activation_fn=tf.nn.relu,
             scope='%s_fc' % name)  
         # fc to logits
         logits = tf.contrib.layers.fully_connected(

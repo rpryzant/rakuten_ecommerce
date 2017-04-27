@@ -1,5 +1,7 @@
 """
 python trainer.py test ../data_wrangling/total.inputs.bpe ../data_wrangling/total.outputs ../data_wrangling/bpe.vocab
+
+python trainer.py test ../data/example_data/bag.inputs.bpe ../data/example_data/bag.outputs ../data/example_data/bpe.vocab
 """
 
 import cPickle
