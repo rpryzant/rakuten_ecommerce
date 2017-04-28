@@ -2,10 +2,9 @@ This code has lots of dependency.  (But at least it's working haha)
 
 *R-related*
 
-You have to install R >= 3.3.3 
-and you have to install following R libraries:
-lme4: to compute random effect model 
-MuMIn: to compute r^2 of random effect model: http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00261.x/full
+You have to install R >= 3.3.3 and you have to install following R libraries:
+- lme4: to compute random effect model 
+- MuMIn: to compute r^2 of random effect model: http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00261.x/full
 
 Then, you have to install rpy2 to use r on Python3. I recommend Dock or virtual env but I'm not familiar with these.
 
@@ -35,12 +34,12 @@ Results give you abbliation test result.
     -bp	0.5106	0.7878		0.6186
 
 features
-all =  use all features (pos + keyword+ BP(with NUM_OF_TOP_KEYWORD))
-number of keyword = pos + BP(with NUM_OF_TOP_KEYWORD)
-pos = keyword+ BP(with NUM_OF_TOP_KEYWORD)
-BP = keyword+ pos
+- all =  use all features (pos + keyword+ BP(with NUM_OF_TOP_KEYWORD))
+- wo/number of keyword = pos + BP(with NUM_OF_TOP_KEYWORD)
+- wo/pos = keyword+ BP(with NUM_OF_TOP_KEYWORD)
+- wo/BP = keyword+ pos
 
 models
-fix_r2: this number is how well fixed effect variable(here, features above) can explain the sales.
-random_effect_r2: this number is how well fixed effect variable and random effect variable (shop_id, product_id,price) can explain sales
-adjusted^2: this number is the adjusted r^2 simple linear regression using both fixed and random effect.
+- fix_r2: this number is how well fixed effect variable(here, features above) can explain the sales.
+- random_effect_r2: this number is how well fixed effect variable and random effect variable (shop_id, product_id,price) can explain sales
+- adjusted^2: this number is the adjusted r^2 simple linear regression using both fixed and random effect.
