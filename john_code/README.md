@@ -2,7 +2,7 @@ This code has lots of dependency.  (But at least it's working haha)
 
 *R-related*
 
-You have to install R >= 3.3.3 and you have to install following R libraries:
+Please install R >= 3.3.3 and following R libraries:
 - lme4: to compute random effect model 
 - MuMIn: to compute r^2 of random effect model: http://onlinelibrary.wiley.com/doi/10.1111/j.2041-210x.2012.00261.x/full
 
