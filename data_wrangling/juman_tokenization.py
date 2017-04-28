@@ -10,11 +10,6 @@ import os
 import commands
 from tqdm import tqdm
 
-from pyknp import Jumanpp
-
-from jpn.deinflect import guess_stem
-from rakutenma import RakutenMA
-
 
 def process_command_line():
     """
@@ -31,11 +26,8 @@ def process_command_line():
     parser.add_argument('-v', '--vocab', dest='vocab', type=str, default=None, help='optional vocab output')
     parser.add_argument('-t', '--threads', dest='threads', type=int, default=1, help='number of threads (TODO)')
 
-
     args = parser.parse_args()
     return args
-
-
 
 
 def wc(f):
@@ -70,9 +62,6 @@ def tokenize_file(f, pos=False):
     return '\n'.join(tokenize(line, pos) for line in tqdm(open(f), total=wc(f)))
 
 
-
-
-
 def main(args):
     # tokenize input
     out = tokenize_file(args.corpus, args.pos)
@@ -89,13 +78,6 @@ def main(args):
             f.write(vocab)
 
 
-
 if __name__ == '__main__':
     args = process_command_line()
     main(args)
-
-
-
-
-
-
