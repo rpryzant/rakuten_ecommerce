@@ -40,9 +40,6 @@ def process_command_line():
 
 
 
-def wc(f):
-    return int(commands.getstatusoutput('wc -l %s' % f)[1].split()[0])
-
 
 
 ##########################################################################
@@ -77,11 +74,12 @@ def tokenize_file_rakuten(file):
 ##########################################################################
 ##########################################################################
 
+def wc(f):
+    return int(commands.getstatusoutput('wc -l %s' % f)[1].split()[0])
 
 
-################## TOKENIZATION WITH JUMAN CLI #####################
-def tokenize_juman_cli(line):
-    def get_token(morph):
+def tokenize(line):
+    def get_tok(morph):
         morph = morph.split()
         if not morph or morph[-1] == 'NIL' or len(morph) < 4:
             return ''
@@ -94,12 +92,12 @@ def tokenize_juman_cli(line):
         return text
 
     cmd = "echo '%s' | juman" % clean(line)
-    juman_output = commands.getstatusoutput(cmd)[1]
-    return ' '.join(get_token(tok) for tok in juman_output.split('\n') if get_token(tok))
+    juman_out = commands.getstatusoutput(cmd)[1]
+    return ' '.join(get_tok(tok) for tok in juman_out.split('\n') if get_tok(tok))
 
 
-def tokenize_file_juman_cli(f):
-    return '\n'.join(tokenize_juman_cli(line) for line in tqdm(open(f), total=wc(f)))
+def tokenize_file(f):
+    return '\n'.join(tokenize(line) for line in tqdm(open(f), total=wc(f)))
 
 
 
@@ -107,7 +105,7 @@ def tokenize_file_juman_cli(f):
 
 def main(args):
     # tokenize input
-    out = tokenize_file_juman_cli(args.corpus)
+    out = tokenize_file(args.corpus)
 
     # write to output
     with open(args.output, 'w') as f:
