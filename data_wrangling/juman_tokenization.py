@@ -83,12 +83,10 @@ def tokenize(line):
         morph = morph.split()
         if not morph or morph[-1] == 'NIL' or len(morph) < 4:
             return ''
-        else:
-            return morph[2]
+        return morph[2]
 
     def clean(text):
-        text = text.replace("'", '')
-        text = text.replace('"', '')
+        text = text.replace("'", '').replace('"', '')
         return text
 
     cmd = "echo '%s' | juman" % clean(line)
