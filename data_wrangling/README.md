@@ -26,12 +26,10 @@ Install tqdm: `pip install tqdm`
 #### Usage
 
 ```
-python juman_tokenization.py [input file] [output file path] 
+python juman_tokenization.py [input file] [output file path] (-v vocab path)  (-pos)
 ```
 
-This will tokenize the `input file` with Juman and write to the `output file path`.
-
-There are also some optional flags:
+This will tokenize the `input file` with Juman and write to the `output file path`. Flags in parentheses `(...)` are optional. They are as follows:
 
 * `-pos`: attach POS tags to each word in the output.
 * `-v [vocab file path]`: write a vocab file as well.
