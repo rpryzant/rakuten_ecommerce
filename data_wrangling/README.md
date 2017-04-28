@@ -34,10 +34,3 @@ This will tokenize the `input file` with Juman and write to the `output file pat
 * `-pos`: attach POS tags to each word in the output.
 * `-v [vocab file path]`: write a vocab file as well.
 
-This is an example of a full run. This fun will tokenize `japanese_text.txt` and write its output to `japanese_text.tokenized`. It will also write the vocabulary to `text.vocab`. POS tags will be attached to each word.
-
-
-```
-python juman_tokenization.py japanese_text.txt japanese_text.tokenized -v text.vocab -pos
-```
-
