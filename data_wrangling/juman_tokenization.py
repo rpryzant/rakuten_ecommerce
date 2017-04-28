@@ -30,6 +30,7 @@ def process_command_line():
     parser.add_argument('output', metavar='output', type=str, help='where to write tokenized outputs')
 
     # optional arguments
+    parser.add_argument('-pos', '--pos', dest='pos', action='store_true', help='create word:pos features')
     parser.add_argument('-v', '--vocab', dest='vocab', type=str, default=None, help='optional vocab output')
     parser.add_argument('-t', '--threads', dest='threads', type=int, default=1, help='number of threads (TODO)')
 
@@ -78,11 +79,13 @@ def wc(f):
     return int(commands.getstatusoutput('wc -l %s' % f)[1].split()[0])
 
 
-def tokenize(line):
+def tokenize(line, pos=False):
     def get_tok(morph):
         morph = morph.split()
         if not morph or morph[-1] == 'NIL' or len(morph) < 4:
             return ''
+        if pos:
+            return '%s:%s' % (morph[2], morph[3])
         return morph[2]
 
     def clean(text):
@@ -94,8 +97,8 @@ def tokenize(line):
     return ' '.join(get_tok(tok) for tok in juman_out.split('\n') if get_tok(tok))
 
 
-def tokenize_file(f):
-    return '\n'.join(tokenize(line) for line in tqdm(open(f), total=wc(f)))
+def tokenize_file(f, pos=False):
+    return '\n'.join(tokenize(line, pos) for line in tqdm(open(f), total=wc(f)))
 
 
 
@@ -103,7 +106,7 @@ def tokenize_file(f):
 
 def main(args):
     # tokenize input
-    out = tokenize_file(args.corpus)
+    out = tokenize_file(args.corpus, args.pos)
 
     # write to output
     with open(args.output, 'w') as f:
