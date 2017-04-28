@@ -1,7 +1,4 @@
 """
-Tokenizes an input corpus file (one japanese text sequence per line)
-    with the Juman tokenizer 
-For more infor on Juman: http://www.utali.io/entry/2016/10/20/202744
 
 https://pypi.python.org/pypi/JapaneseTokenizer
 
@@ -41,45 +38,15 @@ def process_command_line():
 
 
 
-
-
-##########################################################################
-######################          DEPRECIATED     ##########################
-##########################################################################
-##########################################################################
-
-################### TOKENIZATION WITH JUMAN (doesnt work) #################
-def tokenize_juman(line, tokenizer):
-    def get_token(morph):
-        return morph.repname if morph.repname != "" else morph.genkei
-    result = tokenizer.analysis(line.decode('utf8'))
-    return ' '.join(get_token(morph) for morph in result.mrph_list())
-
-def tokenize_file_juman(file):
-    tokenizer = Jumanpp()
-    file = open(file)
-    return '\n'.join(tokenize(l, tokenizer) for l in file)
-
-############# TOKENIZATION WITH RAKUTENMA (prohibitively slow) ############
-def tokenize_rakuten(line, tokenizer):
-    return u' '.join(guess_stem(x)[0] for [x, pos] in tokenizer.tokenize(line.decode('utf8')))
-
-def tokenize_file_rakuten(file):
-    model = 'rakuten_model_ja.min.json'
-    tokenizer = RakutenMA(json.loads(open(model).read()))
-    tokenizer.hash_func = RakutenMA.create_hash_func(tokenizer, 15)
-    return '\n'.join(tokenize_rakuten(l, tokenizer) for l in open(file))
-
-##########################################################################
-##########################################################################
-##########################################################################
-##########################################################################
-
 def wc(f):
+    """ number of lines in a file
+    """
     return int(commands.getstatusoutput('wc -l %s' % f)[1].split()[0])
 
 
 def tokenize(line, pos=False):
+    """ tokenize a line
+    """
     def get_tok(morph):
         morph = morph.split()
         if not morph or morph[-1] == 'NIL' or len(morph) < 4:
@@ -98,6 +65,8 @@ def tokenize(line, pos=False):
 
 
 def tokenize_file(f, pos=False):
+    """ tokenize a file
+    """
     return '\n'.join(tokenize(line, pos) for line in tqdm(open(f), total=wc(f)))
 
 
