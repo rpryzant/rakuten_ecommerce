@@ -25,10 +25,11 @@ These files will be replaced with the files you're processing. So need to clean 
     BP_KEYWORD_LI = [line.strip().split()[0] for line in open(fin_bp_keyword) if len(line.strip().split()[0]) > 1][:NUM_OF_TOP_KEYWORD]
 
 *result*
-Results give you abbliation test result.
+
+Results give you abbliation test result for your neural model selection. this is to select best NN parameter for BPE. I think you can  use random_effect_r2 for the final selection. 
 
     result	fix_r2	random_effect_r2		adjusted
-    all		0.73090.8114		0.7654
+    all		0.7309   0.8114		0.7654
     -# of keyword	0.7309	0.8114		0.7654
     -pos	0.5550	0.8127		0.6317
     -bp	0.5106	0.7878		0.6186
