@@ -36,10 +36,11 @@ Results give you abbliation test result.
 
 features
 all =  use all features (pos + keyword+ BP(with NUM_OF_TOP_KEYWORD))
-- # of keyword = pos + BP(with NUM_OF_TOP_KEYWORD)
-- pos = keyword+ BP(with NUM_OF_TOP_KEYWORD)
-- BP = keyword+ pos
+number of keyword = pos + BP(with NUM_OF_TOP_KEYWORD)
+pos = keyword+ BP(with NUM_OF_TOP_KEYWORD)
+BP = keyword+ pos
 
+models
 fix_r2: this number is how well fixed effect variable(here, features above) can explain the sales.
 random_effect_r2: this number is how well fixed effect variable and random effect variable (shop_id, product_id,price) can explain sales
 adjusted^2: this number is the adjusted r^2 simple linear regression using both fixed and random effect.
