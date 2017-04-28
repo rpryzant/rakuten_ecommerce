@@ -8,7 +8,7 @@ This file tokenizes japanese text with the Juamn CLI iterface.
 
 #### Dependancies
 
-Install Juman:
+1. Install Juman:
 
 ```
 wget -O juman7.0.1.tar.bz2 "http://nlp.ist.i.kyoto-u.ac.jp/DLcounter/lime.cgi?down=http://nlp.ist.i.kyoto-u.ac.jp/nl-resource/juman/juman-7.01.tar.bz2&name=juman-7.01.tar.bz2"
@@ -19,7 +19,7 @@ make
 [sudo] make install
 ```
 
-Install tqdm: `pip install tqdm`
+2. Install tqdm: `pip install tqdm`
 
 
 
