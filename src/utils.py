@@ -49,7 +49,7 @@ def process_command_line():
         help='num attentional units')
     parser.add_argument('-ph', '--prediction-units', dest='prediction_units', type=int, default=32, 
         help='num prediction hidden units')
-    parser.add_argument('-e', '--epochs', dest='epochs', type=int, default=3, 
+    parser.add_argument('-e', '--epochs', dest='epochs', type=int, default=12, 
         help='num training epochs')
     
     args = parser.parse_args()

@@ -18,7 +18,7 @@ import argparse # option parsing
 
 def main(args):
     if not os.path.exists(args.checkpoint):
-        os.mkdir(args.checkpoint)
+        os.makedirs(args.checkpoint)
 
     c = utils.make_config(args)
 
