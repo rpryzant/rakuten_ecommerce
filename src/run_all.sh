@@ -19,7 +19,7 @@ echo ${GPU}
 # run all combos
 for wv_size in 64; do
     for reverse in True False; do
-        for key in word_vectors rnn_states; do
+        for key in rnn_states word_vectors; do
             for type in bahdanau fc; do
                 for order in before_split after_split; do
                     for mixing_ratio in 0.25 0.5 0.75; do
@@ -28,8 +28,12 @@ for wv_size in 64; do
                                 for pred_units in 64; do
                                     SETTINGS=${wv_size}-${reverse}-${key}-${type}-${order}-${mixing_ratio}-${hidden_size}-${attn_units}-${pred_units}
                                     OUT_DIR=${OUT}/${SETTINGS}
-                                    echo 'INFO: starting '${OUT_DIR}
-                                    python trainer.py ${OUT_DIR} \
+				    PREDICTIONS=${OUT_DIR}/out.pkl
+				    if [ -f $PREDICTIONS ]; then
+					echo ${OUT_DIR}' already done!'
+				    else
+                                        echo 'INFO: starting '${OUT_DIR}
+					python trainer.py ${OUT_DIR} \
                                                       ${DATA}/inputs \
                                                       ${DATA}/outputs \
                                                       ${DATA}/vocab \
@@ -54,6 +58,7 @@ for wv_size in 64; do
                                     #                          ${DATA}/vocab \
                                     #                          ${OUT_DIR}/choco-best-${SETTINGS} \
                                     #                          ${OUT_DIR}/choco-worst-${SETTINGS}
+				    fi
                                 done
                             done
                         done

@@ -5,7 +5,7 @@ python trainer.py test ../data/example_data/bag.inputs.bpe ../data/example_data/
 """
 
 import cPickle
-import model
+import models
 import utils
 import input_pipeline
 import tensorflow as tf
@@ -33,7 +33,7 @@ def main(args):
 #    gpu_options = tf.GPUOptions(allow_growth=True)
     sess =  tf.Session()#config=tf.ConfigProto(gpu_options=gpu_options, allow_soft_placement=True))
 
-    m = model.Model(c, sess, d)
+    m = models.Model(c, sess, d)
 
     sess.run(tf.global_variables_initializer())    
 

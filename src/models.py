@@ -75,7 +75,7 @@ class Model:
         #   share the same attention graph
         # TODO -- this precludes tf from reading checkpoints for some 
         #          reason???
-        self.attention_fn = None
+        attention_fn = None
         if self.attention_order == 'before_split':
             attention_fn = self.build_attention_fn()
 
@@ -121,7 +121,6 @@ class Model:
     def train_on_batch(self, source, source_len, log_sales, price, shop, category, learning_rate=0.0003):
         """ train the model on a batch of data
         """
-        print 'HERE!!!!!!'
         _, sales_hat, price_hat, shop_hat, category_hat, loss = \
             self.sess.run([self.train_step, self.sales_hat, self.price_hat, self.shop_hat, self.category_hat, self.loss],
                                 feed_dict={
@@ -306,14 +305,14 @@ class Model:
     def run_encoder(self, source, source_len):
         """ runs the source embeddings through an encoder
         """
-        cell = self.build_rnn_cell()
+        cell1, cell2 = self.build_rnn_cells()
 
         if self.attention_keys == 'word_vectors':
             encoder = encoders.IdentityEncoder()
         elif self.num_layers == 1:
-            encoder = encoders.BidirectionalEncoder(cell)
+            encoder = encoders.BidirectionalEncoder(cell1, cell2)
         else:
-            encoder = encoders.StackedBidirectionalEncoder(cell)
+            encoder = encoders.StackedBidirectionalEncoder(cell1, cell2)
 
         encoder_output = encoder(source, source_len)
         return encoder_output
@@ -331,14 +330,18 @@ class Model:
         return attention_fn
 
 
-    def build_rnn_cell(self):
+    def build_rnn_cells(self):
         """ builds an rnn cell
         """
-        cell = tf.contrib.rnn.BasicLSTMCell(self.hidden_size, state_is_tuple=True)
-        cell = tf.contrib.rnn.DropoutWrapper(cell,
+        cell1 = tf.contrib.rnn.BasicLSTMCell(self.hidden_size, state_is_tuple=True)
+        cell1 = tf.contrib.rnn.DropoutWrapper(cell1,
                                              input_keep_prob=(1 - self.dropout))
+        cell2 = tf.contrib.rnn.BasicLSTMCell(self.hidden_size, state_is_tuple=True)
+        cell2 = tf.contrib.rnn.DropoutWrapper(cell2,
+                                             input_keep_prob=(1 - self.dropout))
+
         if self.num_layers == 1:
-            return cell
+            return cell1, cell2
 
         stacked_cell = tf.contrib.rnn.MultiRNNCell([cell] * self.num_layers,
                                                    state_is_tuple=True)

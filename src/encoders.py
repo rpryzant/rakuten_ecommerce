@@ -38,14 +38,15 @@ class StackedBidirectionalEncoder(GraphModule):
 class BidirectionalEncoder(GraphModule):
     """ single-layer bidirectional encoder
     """
-    def __init__(self, cell, name='bidirectional'):
+    def __init__(self, cell1, cell2, name='bidirectional'):
         super(BidirectionalEncoder, self).__init__(name)
-        self.cell = cell
+        self.cell1 = cell1
+        self.cell2 = cell2
 
     def _build(self, inputs, lengths):
         outputs_pre, final_state = tf.nn.bidirectional_dynamic_rnn(
-            cell_fw=self.cell,
-            cell_bw=self.cell,
+            cell_fw=self.cell1,
+            cell_bw=self.cell2,
             inputs=inputs,
             sequence_length=lengths,
             dtype=tf.float32)
