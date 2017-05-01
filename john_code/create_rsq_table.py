@@ -86,7 +86,6 @@ def create_item_keyword_dic(fin_target, fin_bp_in, fin_morph_in):
     line_count=0
     for line in open(fin_morph_in):
         line_items = line.strip().split()
-        #이게 탭이 아니었구먼..
         item_id =  item_id_index_dic[line_count]
         item_id_morph_pos_dic.setdefault(item_id,[[],[]])
         item_id_pos_dic.setdefault(item_id,[])
@@ -392,8 +391,6 @@ if __name__ == '__main__':
 
     #print(base.summary(result))
 
-
-
     #all - #of keyword
     result = rpy2.robjects.r('''fit=lmer(target ~ . -keyword -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
     rpy2.robjects.globalenv['lm_result'] = result
@@ -426,15 +423,11 @@ if __name__ == '__main__':
     result_wo_bp.append(float(base.summary(result)[8][0]))  # adjusted_r
 
     print('=====result of keywords generated with bp=====')
-    #all
-
-
     print('result\tfix_r2\trandom_effect_r2\t\tadjusted')
     print('all\t\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
     print('-# of keyword\t%.4f\t%.4f\t\t%.4f' % (result_wo_keyword[0], result_wo_keyword[1], result_wo_keyword[2]))
     print('-pos\t%.4f\t%.4f\t\t%.4f' % (result_wo_pos[0], result_wo_pos[1], result_wo_pos[2]))
     print('-bp\t%.4f\t%.4f\t\t%.4f' % (result_wo_bp[0], result_wo_bp[1], result_wo_bp[2]))
-
 
 
 
@@ -480,7 +473,6 @@ if __name__ == '__main__':
 
 
     print('=====result of keywords generated with mp=====')
-  
     print('result\tfix_r2\trandom_effect_r2\t\tadjusted')
     print('all\t\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
     print('-# of keyword\t%.4f\t%.4f\t\t%.4f' % (result_wo_keyword[0], result_wo_keyword[1], result_wo_keyword[2]))
