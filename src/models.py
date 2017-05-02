@@ -1,5 +1,7 @@
 """
-TODO - batch norm as CLI flag
+TODO - batch norm as CLI flag??
+
+     - distributed training 
 """
 import tensorflow as tf
 from tensorflow.python.framework import function
@@ -10,14 +12,20 @@ import encoders
 import attention
 import os
 
+
+
 # # # # global gradient reversal functions  # # # #
 def reverse_grad_grad(op, grad):
     return tf.constant(-1.) * grad
+
 
 @function.Defun(tf.float32, python_grad_func=reverse_grad_grad)
 def reverse_grad(tensor):
     return tf.identity(tensor)
 # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+
+
 
 
 
@@ -80,7 +88,7 @@ class Model:
             attention_fn = self.build_attention_fn()
 
         # run the encoding through each prediction head
-        with tf.variable_scope('sales'):
+        with tf.variable_scope('sales'):    # can also make a classifier
             self.sales_hat, self.sales_loss, self.sales_attn = self.regressor(
                 self.log_sales,
                 source_encoding, 
