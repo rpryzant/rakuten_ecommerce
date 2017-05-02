@@ -9,30 +9,37 @@ Please install R >= 3.3.3 and following R libraries:
 Then, you have to install rpy2 to use r on Python3. I recommend Dock or virtual env but I'm not familiar with these.
 
 *read data*
-   
-    fin_desc_pro_pattern = '/Users/forumai/Documents/work/stanford_work/item_id_desc/choco_desc_pro/choco.desc.*.pre'
-    fin_desc_pattern = '/Users/forumai/Documents/work/stanford_work/item_id_desc/choco_desc/choco.desc.*[0-9]'
+    fin_target =  '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_outputs'
+    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/bpe/choco/choco.model_inputs.bpe'
+    fin_morph_in ='/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_inputs'
 
-    fin_desc_head = '/Users/forumai/Documents/work/stanford_work/item_id_desc/choco_desc/choco.desc.'
-    fin_sales = '/Users/forumai/Documents/work/stanford_work/item_id_desc/sales_regression/choco_all.sales2.combined.txt'
 
-These files will be replaced with the files you're processing. So need to clean up the read_data and read_sales
+    test_item_id = '/Users/forumai/Documents/work/stanford_work/item_id_desc/choco_multi_candid3.txt'
 
 *BP encoding keywords*
 
-    fin_bp_keyword =  '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16' #file path
-    NUM_OF_TOP_KEYWORD = 300 # of keyword to use
-    BP_KEYWORD_LI = [line.strip().split()[0] for line in open(fin_bp_keyword) if len(line.strip().split()[0]) > 1][:NUM_OF_TOP_KEYWORD]
+   
+    fin_bp_keyword =  '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
+    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/item_id_desc/sales_regression/choco.odd_ratio.wordcate.txt'
+
 
 *result*
 
-Results give you abbliation test result for your neural model selection. this is to select best NN parameter for BPE. I think you can  use random_effect_r2 for the final selection. 
+Results give you abbliation test result for your neural model selection. this is to select best NN parameter for BPE/MORP. I think you can  use random_effect_r2 for the final selection. 
 
+    =====result of keywords generated with bp=====
     result	fix_r2	random_effect_r2		adjusted
-    all		0.7309   0.8114		0.7654
-    -# of keyword	0.7309	0.8114		0.7654
-    -pos	0.5550	0.8127		0.6317
-    -bp	0.5106	0.7878		0.6186
+    all		0.7366   0.9312		0.8063
+    -# of keyword	0.7366	0.9312		0.8063
+    -pos	0.7023	0.9228		0.7716
+    -bp	0.4845	0.7411		0.5067
+
+    =====result of keywords generated with mp=====
+    result	fix_r2	random_effect_r2		adjusted
+    all		0.7415	0.9120		0.8244
+    -# of keyword	0.7568	0.9103		0.8244
+    -pos	0.7865	0.8759		0.8010
+    -mp	0.4845	0.7411		0.5067
 
 features
 - all =  use all features (pos + keyword+ BP(with NUM_OF_TOP_KEYWORD))
