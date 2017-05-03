@@ -382,7 +382,7 @@ if __name__ == '__main__':
 
 
  
-    result = rpy2.robjects.r('''fit=lmer(target ~ . -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
+    result = rpy2.robjects.r('''fit=lmer(target ~ . -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     all_result = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))#language only vs # language/shop/product_id
 
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     #print(base.summary(result))
 
     #all - #of keyword
-    result = rpy2.robjects.r('''fit=lmer(target ~ . -keyword -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
+    result = rpy2.robjects.r('''fit=lmer(target ~ . -keyword -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_keyword = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)''')) #language only vs # language/shop/product_id
 
@@ -403,7 +403,7 @@ if __name__ == '__main__':
 
 
     #all - pos
-    result = rpy2.robjects.r('''fit=lmer(target ~ . -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_posmp)''')
+    result = rpy2.robjects.r('''fit=lmer(target ~ . -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_posmp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_pos = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)''')) #language only vs # language/shop/product_id
 
@@ -415,7 +415,7 @@ if __name__ == '__main__':
     #all - bp
 
     result = rpy2.robjects.r(
-        '''fit=lmer(target ~ . -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mpbp)''')
+        '''fit=lmer(target ~ . -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mpbp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_bp = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
 
@@ -432,7 +432,7 @@ if __name__ == '__main__':
 
 
     result = rpy2.robjects.r(
-        '''fit=lmer(target ~ . -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_bp)''')
+        '''fit=lmer(target ~ . -price -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_bp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     all_result = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
 
