@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import glob
 from sklearn.preprocessing import StandardScaler
 import math
@@ -218,7 +219,7 @@ def create_target_li(index_item_dic, data_li, item_id_target_price_dic):
 
 
 def fea_vetorizer_manual(data_li):
-    categorical_fea_set = {'shop_id', 'product_id', 'unit'}
+    categorical_fea_set = set(['shop_id', 'product_id', 'unit'])
     bp_fea_li = ['bp.%s' % (x) for x in BP_KEYWORD_LI]
     morph_fea_li = ['mp.%s' % (x) for x in MORPH_KEYWORD_LI]
 
@@ -316,14 +317,23 @@ def convert_to_rdata(scaled_data, fea_li, target_li):
 
 
 if __name__ == '__main__':
-    fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_outputs'
-    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/bpe/choco/choco.model_inputs.bpe'
-    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_inputs'
+    fin_target = '../data/large/morph/with_pos/choco/outputs'    
+    #fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_outputs'
 
-    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
+    fin_bp_in = '../data/large/bpe/choco/inputs'
+#    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/bpe/choco/choco.model_inputs.bpe'
 
-    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
-    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_odd_ratio/choco_morph.oddratio.txt'
+    fin_morph_in = '../data/large/morph/with_pos/choco/inputs'
+#    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_inputs'
+
+    test_item_id = '../data/labels/choco.multi_candid.all'
+#    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
+
+    fin_bp_keyword = '../src/MORPH_CHOCO/64-True-word_vectors-bahdanau-before_split-0.25-64-64-64/choco-best-64-True-word_vectors-bahdanau-before_split-0.25-64-64-64'
+#    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
+
+    fin_odd_keyword = 'choco_morph.oddratio.txt'
+#    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_odd_ratio/choco_morph.oddratio.txt'
 
     NUM_OF_TOP_KEYWORD = 500
 
