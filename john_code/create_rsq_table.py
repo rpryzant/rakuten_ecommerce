@@ -323,14 +323,23 @@ def convert_to_rdata(scaled_data, fea_li, target_li):
 
 
 if __name__ == '__main__':
-    fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/outputs'
-    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/inputs'
-    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/morph/with_pos/choco/inputs'
+    fin_target = '/Users/rapigan/foreign_mount/data/large/bpe/choco/outputs.binary'
+#    fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/outputs'
 
-    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
+    fin_bp_in = '/Users/rapigan/foreign_mount/data/large/bpe/choco/inputs.binary'
+#    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/inputs'
 
-    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
-    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/choco_morph.oddratio.txt'
+    fin_morph_in = '/Users/rapigan/foreign_mount/data/large/morph/with_pos/choco/inputs.binary'
+#    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/morph/with_pos/choco/inputs'
+
+    test_item_id = '/Users/rapigan/foreign_mount/data/labels/choco.multi_candid.all'
+#    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
+
+    fin_bp_keyword = '/Users/rapigan/foreign_mount/src/BPE_CHOCO/64-True-rnn_states-bahdanau-after_split-0.5-64-64-64/choco-best-64-True-rnn_states-bahdanau-after_split-0.5-64-64-64'
+#    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
+
+    fin_odd_keyword = 'choco_morph.oddratio.txt'
+#    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/choco_morph.oddratio.txt'
 
     NUM_OF_TOP_KEYWORD = 500
 
