@@ -37,21 +37,26 @@ def main(args):
 
     sess.run(tf.global_variables_initializer())    
 
-    print 'INFO: starting training...'
-    prog = utils.Progbar(target=d.get_num_batches())
-    epoch = 1
-    for _ in range(c.num_epochs):
-        epoch_loss = 0
-        for i, batch in enumerate(d.batch_iter()):
-            sales_hat, price_hat, shop_hat, category_hat, loss = \
-                m.train_on_batch(*batch[:-1])
-            prog.update(i+1, [('train loss', loss)])
-            epoch_loss += loss
-        print '\n INFO: EPOCH ', epoch, ' MEAN LOSS: ', epoch_loss / float(d.get_num_batches())
-        print 'INFO: saving checkpoint...'
-        m.save(args.checkpoint)
-        print 'INFO: ...done!'
-        epoch += 1
+    if args.train:
+        print 'INFO: starting training...'
+        prog = utils.Progbar(target=d.get_num_batches())
+        epoch = 1
+        for _ in range(c.num_epochs):
+            epoch_loss = 0
+            for i, batch in enumerate(d.batch_iter()):
+                sales_hat, price_hat, shop_hat, category_hat, loss = \
+                    m.train_on_batch(*batch[:-1])
+                prog.update(i+1, [('train loss', loss)])
+                epoch_loss += loss
+            print '\n INFO: EPOCH ', epoch, ' MEAN LOSS: ', epoch_loss / float(d.get_num_batches())
+            print 'INFO: saving checkpoint...'
+            m.save(args.checkpoint)
+            print 'INFO: ...done!'
+            epoch += 1
+    else:
+        print 'INFO: loading model from checkpoint...'
+        m.load(dir=args.checkpoint)
+        print 'INFO: done!'
 
 
     if args.output is not None:

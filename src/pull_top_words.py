@@ -1,5 +1,5 @@
 """
-python pull_top_words.py rnn_states-bahdanau-small/out.pkl ../data_wrangling/choco_multi_candid3.txt ../data_wrangling/bpe.vocab rnn_states-bahdanau-small/test_best rnn_states-bahdanau-small/test_worst
+python pull_top_words.py MORPH_HEALTH/64-True-word_vectors-bahdanau-before_split-0.25-64-64-64/out.pkl ../data/labels/choco.multi_candid.all ../data/large/morph/without_pos/health/vocab TEST_best TEST_worst
 
 TODO: - MULTIPLE ATTENTIONS, TAKE DIF
 
@@ -36,11 +36,11 @@ def word_scores_for_ids(output, ids):
 def rm_dups(word_scores):
     """ rm dups, keeping each words max score
     """
-
     tmp = defaultdict(lambda: -100)
     for word, score in word_scores:
         tmp[word] = max(tmp[word], score)
     return tmp.items()
+
 
 def build_vocab(vocab):
     d = {}
@@ -59,20 +59,26 @@ def get_pth(word_scores, p):
     return word_scores[:cutoff]
 
 # load in args
-inference_output = load_pickle(sys.argv[1])
+print 'INFO: loading inference output'
+inference_output = load_pickle(sys.argv[1])    # keys: ['source', 'ids', 'len', 'attn']
+#print inference_output['attn']
 labels = open(sys.argv[2])
 vocab = open(sys.argv[3])
 best_path = sys.argv[4]
 worst_path = sys.argv[5]
 
 # extract ids from labels
+print 'INFO: extracting labels'
 labels = item_ids(labels)
+
 # get (word, score) pairs, remove duplicates, and do index => word lookup
+print 'INFO: scoring words'
 word_scores = word_scores_for_ids(inference_output, labels)
 word_scores = rm_dups(word_scores)
 word_scores = lookup_words(word_scores, vocab)
 
 # sort and take the best/worst
+print 'INFO: taking best words'
 word_scores = sorted(word_scores, key=lambda x: x[1], reverse=True)
 best = get_pth(word_scores, 0.8)
 worst = get_pth(word_scores[::-1], 0.8)

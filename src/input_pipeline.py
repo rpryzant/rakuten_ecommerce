@@ -25,7 +25,7 @@ class DataInputPipeline(object):
 
 
     def get_vocab_size(self):
-        return len(self.word_to_index)
+        return max(self.word_to_index.values()) + 1
 
     def get_num_shops(self):
         return len(self.shop_to_index)
@@ -47,6 +47,7 @@ class DataInputPipeline(object):
             shop = self.shop[i: i+self.batch_size]
             category = self.category[i: i+self.batch_size]
             ids = self.ids[i: i + self.batch_size]
+
             yield example, lens, sales, price, shop, category, ids
 
             i += self.batch_size
@@ -86,7 +87,6 @@ class DataInputPipeline(object):
             enumerate(zip(parse, open(text))):
 
             try:
-                item_id = None
                 out_ids.append(item_id)
                 out_sales.append(float(log_sales))
                 out_shop.append(shop_name_mapping[shop_name])
@@ -111,7 +111,7 @@ class DataInputPipeline(object):
                 self.index_to_category.get(category, None)
 
 
-    def parse_vocab(self, f):
+    def parse_vocab(self, f):   # TODO -- KNOWN BUG: VOCAB ISN'T MAPPED DENSELY TO INDICES IF THERE'S REPEATS
         d = {}
         for i, l in enumerate(open(f)):
             d[l.split()[0]] = i + 2      # +2 to reserve 0 for pad, 1 for unk
