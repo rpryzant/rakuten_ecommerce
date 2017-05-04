@@ -1,9 +1,8 @@
--# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-import glob
+import codecs
+import unicodedata
 from sklearn.preprocessing import StandardScaler
-import math
-import re
 import numpy as np
 import rpy2.robjects
 from rpy2.robjects.packages import importr
@@ -17,12 +16,12 @@ MuMIn = importr('MuMIn')
 
 data_li = []
 
-POS_LI = ['動名詞', '形容名詞', '名詞形態指示詞', '普通名詞', '格助詞', '名詞接頭辞', '名詞性名詞接尾辞', 'カタカナ', '句点', '形容詞',
-          '連体詞', '副詞', '判定詞', '助動詞', '接続詞', '指示詞', '連体詞形態指示詞', '副詞形態指示詞', '感動詞', '名詞', '副詞的名詞',
-          '形式名詞', '固有名詞', '組織名', '地名', '人名', 'サ変名詞', '数詞', '時相名詞', '動詞', '助詞', '副助詞', '接続助詞',
-          '終助詞', '接頭辞', '動詞接頭辞', 'イ形容詞接頭辞', 'ナ形容詞接頭辞', '接尾辞', '名詞性述語接尾辞', '名詞性名詞助数辞',
-          '名詞性特殊接尾辞', '形容詞性述語接尾辞', '形容詞性名詞接尾辞', '動詞性接尾辞', '特殊', '読点', '括弧始', '括弧終', '記号', '空白',
-          '未定義語', 'アルファベット', 'その他', '複合名詞', '複合形容詞']
+POS_LI = [u'動名詞', u'形容名詞', u'名詞形態指示詞', u'普通名詞', u'格助詞', u'名詞接頭辞', u'名詞性名詞接尾辞', u'カタカナ', u'句点', u'形容詞',
+          u'連体詞', u'副詞', u'判定詞', u'助動詞', u'接続詞', u'指示詞', u'連体詞形態指示詞', u'副詞形態指示詞', u'感動詞', u'名詞', u'副詞的名詞',
+          u'形式名詞', u'固有名詞', u'組織名', u'地名', u'人名', u'サ変名詞', u'数詞', u'時相名詞', u'動詞', u'助詞', u'副助詞', u'接続助詞',
+          u'終助詞', u'接頭辞', u'動詞接頭辞', u'イ形容詞接頭辞', u'ナ形容詞接頭辞', u'接尾辞', u'名詞性述語接尾辞', u'名詞性名詞助数辞',
+          u'名詞性特殊接尾辞', u'形容詞性述語接尾辞', u'形容詞性名詞接尾辞', u'動詞性接尾辞', u'特殊', u'読点', u'括弧始', u'括弧終', u'記号', u'空白',
+          u'未定義語', u'アルファベット', u'その他', u'複合名詞', u'複合形容詞']
 
 MORPH_KEYWORD_LI = []  # keyword selected by morph
 BP_KEYWORD_LI = []  # keyword selected by BP
@@ -43,7 +42,8 @@ def create_item_keyword_dic(fin_target, fin_bp_in, fin_morph_in):
 
     item_count = 0
 
-    for line in open(fin_target):
+
+    for line in codecs.open(fin_target,'r',encoding='utf-8'):
 
         line_items = line.strip().split('|')
         item_id = line_items[4]
@@ -74,7 +74,9 @@ def create_item_keyword_dic(fin_target, fin_bp_in, fin_morph_in):
     line_count = 0
     ###start next processing -reading input file
 
-    for line in open(fin_bp_in):
+    fin_bp_in_uni = codecs.open(fin_bp_in,'r',encoding='utf-8')
+    for line in fin_bp_in_uni:
+        line = unicodedata.normalize('NFKC', line)
         line_items = line.strip().split()
         item_id = item_id_index_dic[line_count]
 
@@ -84,7 +86,10 @@ def create_item_keyword_dic(fin_target, fin_bp_in, fin_morph_in):
     print('reading bpe complete', len(item_id_bpe_dic))
 
     line_count = 0
-    for line in open(fin_morph_in):
+    fin_morph_in_uni = codecs.open(fin_morph_in,'r',encoding='utf-8')
+
+    for line in fin_morph_in_uni:
+        line = unicodedata.normalize('NFKC', line)
         line_items = line.strip().split()
         item_id = item_id_index_dic[line_count]
         item_id_morph_pos_dic.setdefault(item_id, [[], []])
@@ -119,7 +124,7 @@ def read_desc(item_id_morph_pos_dic, item_id_bpe_dic, fin_test_item_id):
     target_id_set = set()
     target_id_cate_dic = {}
 
-    for line in open(fin_test_item_id):
+    for line in codecs.open(fin_test_item_id, 'r',encoding='utf-8'):
         try:
             target_cate, target_id, _ = line.strip().split('\t')
         except ValueError:
@@ -154,7 +159,7 @@ def read_desc(item_id_morph_pos_dic, item_id_bpe_dic, fin_test_item_id):
         item_bp_list = item_id_bpe_dic[item_id]
         for bp_keyword in BP_KEYWORD_LI:
             if bp_keyword in item_bp_list:
-                bp_fea_name = 'bp.%s' % (bp_keyword)
+                bp_fea_name = u'bp.%s' % (bp_keyword)
                 fea_dic.setdefault(bp_fea_name, 0)
                 fea_dic[bp_fea_name] = 1
 
@@ -168,7 +173,7 @@ def read_desc(item_id_morph_pos_dic, item_id_bpe_dic, fin_test_item_id):
 
         for pos in pos_li:
             if pos in POS_LI:
-                pos_fea_name = 'pos.%s' % (pos)
+                pos_fea_name = u'pos.%s' % (pos)
                 tmp_pos_dic.setdefault(pos_fea_name, 0)
                 tmp_pos_dic[pos_fea_name] += 1
                 fea_dic.setdefault('keyword', 0)
@@ -179,7 +184,7 @@ def read_desc(item_id_morph_pos_dic, item_id_bpe_dic, fin_test_item_id):
 
         for morph in morph_li:
             if morph in MORPH_KEYWORD_LI:
-                odd_fea_name = 'mp.%s' % (morph)
+                odd_fea_name = u'mp.%s' % (morph)
                 fea_dic.setdefault(odd_fea_name, 0)
                 fea_dic[odd_fea_name] = 1  # one-hot
 
@@ -221,8 +226,8 @@ def create_target_li(index_item_dic, data_li, item_id_target_price_dic):
 
 def fea_vetorizer_manual(data_li):
     categorical_fea_set = {'shop_id', 'product_id', 'unit'}
-    bp_fea_li = ['bp.%s' % (x) for x in BP_KEYWORD_LI]
-    morph_fea_li = ['mp.%s' % (x) for x in MORPH_KEYWORD_LI]
+    bp_fea_li = [u'bp.%s' % (x) for x in BP_KEYWORD_LI]
+    morph_fea_li = [u'mp.%s' % (x) for x in MORPH_KEYWORD_LI]
 
     categorical_fea_set.update(set(bp_fea_li))
     categorical_fea_set.update(set(morph_fea_li))
@@ -230,8 +235,8 @@ def fea_vetorizer_manual(data_li):
     # print(len(categorical_fea_set))
     fea_li = ['keyword', 'price']
 
-    fea_li.extend(['pos.%s' % (x) for x in POS_LI])
-    fea_li.extend(['pos.%s.r' % (x) for x in POS_LI])
+    fea_li.extend([u'pos.%s' % (x) for x in POS_LI])
+    fea_li.extend([u'pos.%s.r' % (x) for x in POS_LI])
 
     converted_data_index = dict(zip(fea_li, range(0, len(fea_li))))
     # print(converted_data_index)
@@ -305,7 +310,7 @@ def convert_to_rdata(scaled_data, fea_li, target_li):
     r_df = {}
     for i in range(0, len(r_feature)):
         # print(r_feature[i])
-        fea_name = r_feature[i]
+        fea_name = r_feature[i].encode('utf-8')
         if fea_name == 'shop_id' or fea_name == 'product_id':
             r_df[fea_name] = rpy2.robjects.FactorVector(r_input_t[i])
 
@@ -329,8 +334,8 @@ if __name__ == '__main__':
 
     NUM_OF_TOP_KEYWORD = 500
 
-    MORPH_KEYWORD_LI = [line.strip().split()[0] for line in open(fin_odd_keyword) if float(line.strip().split()[1]) > 1.0][:NUM_OF_TOP_KEYWORD]
-    BP_KEYWORD_LI = [line.strip().split()[0] for line in open(fin_bp_keyword) if len(line.strip().split()[0]) > 1][
+    MORPH_KEYWORD_LI = [line.strip().split()[0] for line in codecs.open(fin_odd_keyword, 'r', encoding='utf-8') if float(line.strip().split()[1]) > 1.0][:NUM_OF_TOP_KEYWORD]
+    BP_KEYWORD_LI = [line.strip().split()[0] for line in codecs.open(fin_bp_keyword,'r',encoding='utf-8') if len(line.strip().split()[0]) > 1][
                     :NUM_OF_TOP_KEYWORD]
 
     item_id_morph_pos_dic, item_id_bpe_dic, item_id_target_price_dic = create_item_keyword_dic(fin_target, fin_bp_in,
