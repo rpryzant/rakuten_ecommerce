@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+-# -*- coding: utf-8 -*-
+
 import glob
 from sklearn.preprocessing import StandardScaler
 import math
@@ -219,7 +220,7 @@ def create_target_li(index_item_dic, data_li, item_id_target_price_dic):
 
 
 def fea_vetorizer_manual(data_li):
-    categorical_fea_set = set(['shop_id', 'product_id', 'unit'])
+    categorical_fea_set = {'shop_id', 'product_id', 'unit'}
     bp_fea_li = ['bp.%s' % (x) for x in BP_KEYWORD_LI]
     morph_fea_li = ['mp.%s' % (x) for x in MORPH_KEYWORD_LI]
 
@@ -317,23 +318,14 @@ def convert_to_rdata(scaled_data, fea_li, target_li):
 
 
 if __name__ == '__main__':
-    fin_target = '../data/large/morph/with_pos/choco/outputs'    
-    #fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_outputs'
+    fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/outputs'
+    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/inputs'
+    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/morph/with_pos/choco/inputs'
 
-    fin_bp_in = '../data/large/bpe/choco/inputs'
-#    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/bpe/choco/choco.model_inputs.bpe'
+    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
 
-    fin_morph_in = '../data/large/morph/with_pos/choco/inputs'
-#    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/large/morph/with_pos/choco/choco.model_inputs'
-
-    test_item_id = '../data/labels/choco.multi_candid.all'
-#    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
-
-    fin_bp_keyword = '../src/MORPH_CHOCO/64-True-word_vectors-bahdanau-before_split-0.25-64-64-64/choco-best-64-True-word_vectors-bahdanau-before_split-0.25-64-64-64'
-#    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
-
-    fin_odd_keyword = 'choco_morph.oddratio.txt'
-#    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_odd_ratio/choco_morph.oddratio.txt'
+    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
+    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/choco_morph.oddratio.txt'
 
     NUM_OF_TOP_KEYWORD = 500
 
@@ -383,6 +375,20 @@ if __name__ == '__main__':
     # this is because regular regression R^2 is to see whether all features can explain sales well
 
 
+
+    result = rpy2.robjects.r(
+        '''fit=lmer(target ~ 1  + (1|shop_id) + (1|product_id), data=dataset)''')
+    rpy2.robjects.globalenv['lm_result'] = result
+    result_random_only = list(
+        rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
+
+    result = rpy2.robjects.r('''fit=lm(target ~ shop_id  + product_id, data=dataset)''')
+    result_random_only.append(float(base.summary(result)[8][0]))
+
+
+    print('=====result of random effect only (shoo id / product_id)=====')
+    print('result\tfix_r2\trandom_effect_r2\t\tadjusted')
+    print('all\t\t%.4f\t%.4f\t\t%.4f' % (result_random_only[0], result_random_only[1], result_random_only[2]))
 
     result = rpy2.robjects.r(
         '''fit=lmer(target ~ . -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
@@ -444,7 +450,7 @@ if __name__ == '__main__':
 
     # all - #of keyword
     result = rpy2.robjects.r(
-        '''fit=lmer(target ~ . -keyword -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_bp)''')
+        '''fit=lmer(target ~ . -keyword -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_bp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_keyword = list(
         rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
@@ -454,7 +460,7 @@ if __name__ == '__main__':
 
     # all - pos
     result = rpy2.robjects.r(
-        '''fit=lmer(target ~ . -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_posbp)''')
+        '''fit=lmer(target ~ . -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_posbp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_pos = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
 
@@ -464,7 +470,7 @@ if __name__ == '__main__':
     # all - mp
 
     result = rpy2.robjects.r(
-        '''fit=lmer(target ~ . -price + -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mpbp)''')
+        '''fit=lmer(target ~ . -price  -shop_id -product_id  + (1|shop_id) + (1|product_id), data=dataset_wo_mpbp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_mp = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
 
@@ -476,4 +482,5 @@ if __name__ == '__main__':
     print('all\t\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
     print('-# of keyword\t%.4f\t%.4f\t\t%.4f' % (result_wo_keyword[0], result_wo_keyword[1], result_wo_keyword[2]))
     print('-pos\t%.4f\t%.4f\t\t%.4f' % (result_wo_pos[0], result_wo_pos[1], result_wo_pos[2]))
-    print('-mp\t%.4f\t%.4f\t\t%.4f' % (result_wo_bp[0], result_wo_mp[1], result_wo_mp[2]))
+    print('-mp\t%.4f\t%.4f\t\t%.4f' % (result_wo_mp[0], result_wo_mp[1], result_wo_mp[2]))
+
