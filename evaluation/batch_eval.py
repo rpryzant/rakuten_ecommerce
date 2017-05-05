@@ -9,6 +9,8 @@ import os
 import commands
 import time
 from tqdm import tqdm
+import re
+import numpy as np
 
 TEST_IDS = '../john_code/choco.multi_candid.all'
 
@@ -30,7 +32,7 @@ def process_command_line():
     return args
 
 
-def parse_table(eval_output):
+def parse_tables(eval_output):
     raw_tables = re.split('={3,}[\w ()/]+={3,}', eval_output)[1:]
     header = []
     values = []
@@ -66,7 +68,7 @@ def gen_evaluations(args):
         cmd = 'python evaluator.py %s %s %s %s %s %s' % (outputs, bpe_inputs, morph_inputs, TEST_IDS, bpe_best, morph_best)
         print cmd
         out = commands.getstatusoutput(cmd)[1]
-        table_header, table_values = parse_evaluator_output(out)
+        table_header, table_values = parse_tables(out)
 
         yield run.replace('-', ','), table_header, table_values
 
