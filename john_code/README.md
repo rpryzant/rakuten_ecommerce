@@ -47,14 +47,14 @@ These results are for the table for BPE/MORH.
     BP + # keywords 	0.4404	0.7381		0.6861
     BP only	0.4319	0.7386		0.5120
 
-    
+```    
     =====result of keywords generated with mp=====
     result	fix_r2	random_effect_r2		adjusted
     all		0.3623	0.7434		0.6444
     MORPH + POS	0.3623	0.7434		0.6444
     MORPH + # keyword 	0.3461	0.7461		0.6286
     MORPH only	0.3465	0.7462		0.6293
-
+```
 features
 - all =  use all features (pos + keyword+ BP(with NUM_OF_TOP_KEYWORD))
 
