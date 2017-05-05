@@ -422,7 +422,7 @@ if __name__ == '__main__':
     all_result.append(float(base.summary(result)[8][0]))
 
     result = rpy2.robjects.r(
-        '''fit=lmer(target ~ . -price -shop_id -product_id -count_bp + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
+        '''fit=lmer(target ~ . -price -shop_id -product_id -count_pos + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_wo_price = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
     result = rpy2.robjects.r('''fit=lm(target ~ . -price -count_pos, data=dataset_wo_mp)''')
