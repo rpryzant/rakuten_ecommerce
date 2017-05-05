@@ -338,7 +338,10 @@ if __name__ == '__main__':
     fin_bp_keyword = '/Users/rapigan/foreign_mount/src/BPE_CHOCO/64-True-rnn_states-bahdanau-after_split-0.5-64-64-64/choco-best-64-True-rnn_states-bahdanau-after_split-0.5-64-64-64'
 #    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
 
-    fin_morph_keyword = 'choco_morph.oddratio.txt'
+
+    fin_morph_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/MORPH/rnn_states-bahdanau-reverse_True-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
+
+#    fin_morph_keyword = 'choco_morph.oddratio.txt'
 #    fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/choco_morph.oddratio.txt'
 
     NUM_OF_TOP_KEYWORD = 500
