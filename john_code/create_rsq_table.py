@@ -402,17 +402,21 @@ if __name__ == '__main__':
     # contain all features . i.e. containing shop and price for usual regression
     # this is because regular regression R^2 is to see whether all features can explain sales well
 
-
-    #ALL = including price, shop, product_id
+        #ALL = including price, shop, product_id
     result = rpy2.robjects.r(
         '''fit=lmer(target ~ . -shop_id -product_id -count_pos + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     all_result = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
-
     result = rpy2.robjects.r('''fit=lm(target ~ . -count_pos, data=dataset_wo_mp)''')
     all_result.append(float(base.summary(result)[8][0]))
 
-    # print(base.summary(result))
+    result = rpy2.robjects.r(
+        '''fit=lmer(target ~ . -price -shop_id -product_id -count_bp + (1|shop_id) + (1|product_id), data=dataset_wo_mp)''')
+    rpy2.robjects.globalenv['lm_result'] = result
+    result_wo_price = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
+    result = rpy2.robjects.r('''fit=lm(target ~ . -price -count_pos, data=dataset_wo_mp)''')
+    result_wo_price.append(float(base.summary(result)[8][0]))
+
 
     # pos+bp
     result = rpy2.robjects.r(
@@ -420,7 +424,6 @@ if __name__ == '__main__':
     rpy2.robjects.globalenv['lm_result'] = result
     result_pos_bp = list(
         rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
-
     result = rpy2.robjects.r(
         '''fit=lm(target ~ . -price -shop_id -product_id -count_pos -count_bp, data=dataset_wo_mp)''')
     result_pos_bp.append(float(base.summary(result)[8][0]))  # adjusted_r
@@ -430,7 +433,6 @@ if __name__ == '__main__':
         '''fit=lmer(target ~ . -price  -shop_id -product_id -count_pos + (1|shop_id) + (1|product_id), data=dataset_wo_posmp)''')
     rpy2.robjects.globalenv['lm_result'] = result
     result_count_bp = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
-
     result = rpy2.robjects.r('''fit=lm(target ~ . -price -count_pos -shop_id -product_id, data=dataset_wo_posmp)''')
     result_count_bp.append(float(base.summary(result)[8][0]))  # adjusted_r
 
@@ -441,14 +443,14 @@ if __name__ == '__main__':
     rpy2.robjects.globalenv['lm_result'] = result
     result_bp_only = list(
         rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
-
     result = rpy2.robjects.r(
         '''fit=lm(target ~ .  -price -count_pos -count_bp -shop_id -product_id, data=dataset_wo_posmp)''')
     result_bp_only.append(float(base.summary(result)[8][0]))  # adjusted_r
 
     print('=====result of keywords generated with bp=====')
     print('result\tfix_r2\trandom_effect_r2\t\tadjusted')
-    print('all\t\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
+    print('all\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
+    print('BP + POS + #BP\t%.4f\t%.4f\t\t%.4f' % (result_wo_price[0], result_wo_price[1], result_wo_price[2]))
     print('BP + POS\t%.4f\t%.4f\t\t%.4f' % (result_pos_bp[0], result_pos_bp[1], result_pos_bp[2]))
     print('BP + # BP \t%.4f\t%.4f\t\t%.4f' % (result_count_bp[0], result_count_bp[1], result_count_bp[2]))
     print('BP only\t%.4f\t%.4f\t\t%.4f' % (result_bp_only[0], result_bp_only[1], result_bp_only[2]))
@@ -458,10 +460,17 @@ if __name__ == '__main__':
     rpy2.robjects.globalenv['lm_result'] = result
     all_result = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
 
-    result = rpy2.robjects.r('''fit=lm(target ~ . -count_bp, data=dataset_wo_mp)''')
+    result = rpy2.robjects.r('''fit=lm(target ~ . -count_bp, data=dataset_wo_bp)''')
     all_result.append(float(base.summary(result)[8][0]))
 
-    # print(base.summary(result))
+    result = rpy2.robjects.r(
+        '''fit=lmer(target ~ . -price -shop_id -product_id -count_bp + (1|shop_id) + (1|product_id), data=dataset_wo_bp)''')
+    rpy2.robjects.globalenv['lm_result'] = result
+    result_wo_price = list(rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
+
+    result = rpy2.robjects.r('''fit=lm(target ~ . -price -count_bp, data=dataset_wo_bp)''')
+    result_wo_price.append(float(base.summary(result)[8][0]))
+
 
     # pos+bp
     result = rpy2.robjects.r(
@@ -469,7 +478,6 @@ if __name__ == '__main__':
     rpy2.robjects.globalenv['lm_result'] = result
     result_pos_mp = list(
         rpy2.robjects.r('''r.squaredGLMM(lm_result)'''))  # language only vs # language/shop/product_id
-
     result = rpy2.robjects.r(
         '''fit=lm(target ~ . -price -count_pos -count_bp -shop_id -product_id, data=dataset_wo_bp)''')
     result_pos_mp.append(float(base.summary(result)[8][0]))  # adjusted_r
@@ -497,7 +505,8 @@ if __name__ == '__main__':
 
     print('=====result of keywords generated with morph=====')
     print('result\tfix_r2\trandom_effect_r2\t\tadjusted')
-    print('all\t\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
+    print('all\t%.4f\t%.4f\t\t%.4f' % (all_result[0], all_result[1], all_result[2]))
+    print('MORPH + POS + #MORPH\t%.4f\t%.4f\t\t%.4f' % (result_wo_price[0], result_wo_price[1], result_wo_price[2]))
     print('MORPH + POS\t%.4f\t%.4f\t\t%.4f' % (result_pos_mp[0], result_pos_mp[1], result_pos_mp[2]))
     print('MORPH + # MORPH \t%.4f\t%.4f\t\t%.4f' % (result_count_mp[0], result_count_mp[1], result_count_mp[2]))
     print('MORPH only\t%.4f\t%.4f\t\t%.4f' % (result_mp_only[0], result_mp_only[1], result_mp_only[2]))
