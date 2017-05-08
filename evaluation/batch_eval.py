@@ -1,6 +1,10 @@
 """
 python batch_eval.py ../src/BPE_CHOCO/ ../src/MORPH_CHOCO/ ../data/large/bpe/choco/ ../data/large/morph/with_pos/choco/ choco
 
+python batch_eval.py ../src/BPE_CHOCO2/ ../src/MORPH_CHOCO2/ /Users/rapigan/Desktop/datasets/bpe/choco /Users/rapigan/Desktop/datasets/morph/choco choco
+
+
+
 python batch_eval.py [bpe out root] [morph out root] [bpe data root] [morph data root] [type]
 """
 import argparse # option parsing
@@ -37,8 +41,8 @@ def parse_tables(eval_output):
     header = []
     values = []
 
-    for i in range(len(x)):
-        table = np.array(zip(*[iter(raw_tables[i].replace(' ', '_').split())]*4))
+    for i, raw_table in enumerate(raw_tables):
+        table = np.array(zip(*[iter(raw_table.replace(' ', '_').split())]*4))
 
         table_type = 'BASE' if i == 0 else 'BPE' if i == 1 else 'MORPH'
         for r in range(table.shape[0])[1:]:
@@ -50,27 +54,29 @@ def parse_tables(eval_output):
 
 
 
+
+
 def gen_evaluations(args):
     bpe_inputs = os.path.join(args.bpe_data, 'inputs')
     morph_inputs = os.path.join(args.morph_data, 'inputs')
     outputs = os.path.join(args.bpe_data, 'outputs')
 
-    for run in tqdm(os.listdir(args.bpe_out)):
+    for run in os.listdir(args.bpe_out):
         bpe_run_dir = os.path.join(args.bpe_out, run)
         bpe_best = os.path.join(bpe_run_dir, '%s-best-%s' % (args.type, run))
         bpe_worst = os.path.join(bpe_run_dir, '%s-worst-%s' % (args.type, run))
+
 
         morph_run_dir = os.path.join(args.morph_out, run)
         morph_best = os.path.join(morph_run_dir, '%s-best-%s' % (args.type, run))
         morph_worst = os.path.join(morph_run_dir, '%s-worst-%s' % (args.type, run))
 
-        start = time.time()
         cmd = 'python evaluator.py %s %s %s %s %s %s' % (outputs, bpe_inputs, morph_inputs, TEST_IDS, bpe_best, morph_best)
-        print cmd
         out = commands.getstatusoutput(cmd)[1]
-        table_header, table_values = parse_tables(out)
+        best_table_header, best_table_values = parse_tables(out)
 
-        yield run.replace('-', ','), table_header, table_values
+
+        yield run.replace('-', ','), best_table_header, best_table_values
 
 
 def main(args):
@@ -78,11 +84,10 @@ def main(args):
                         'attn_type', 'attn_order', 'mixing_ratio', 
                         'hidden_size', 'attn_units', 'pred_units'])
 
-    with open('OUT', 'a') as out:
-        for i, run, header, values in enumerate(gen_evaluations(args)):
-            if i == 0:
-                out.write(run_info + ',' + header + '\n')
-            out.write(run + ',' + values + '\n')
+    for i, (run, header, values) in enumerate(gen_evaluations(args)):
+        if i == 0:
+            print run_info + ',' + header
+        print run + ',' +  values
 
 
 
