@@ -7,6 +7,7 @@ import numpy as np
 import rpy2.robjects
 from rpy2.robjects.packages import importr
 import rpy2.robjects.numpy2ri
+import sys
 
 rpy2.robjects.numpy2ri.activate()
 base = importr('base')
@@ -329,24 +330,12 @@ def convert_to_rdata(scaled_data, fea_li, target_li):
 
 
 if __name__ == '__main__':
-#    fin_target = '/Users/rapigan/foreign_mount/data/large/bpe/choco/outputs'
-    fin_target = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/outputs'
-
-#    fin_bp_in = '/Users/rapigan/foreign_mount/data/large/bpe/choco/inputs'
-    fin_bp_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/bpe/choco/inputs'
-
-
-#    fin_morph_in = '/Users/rapigan/foreign_mount/data/large/morph/with_pos/choco/inputs'
-    fin_morph_in = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/morph/with_pos/choco/inputs'
-
-#    test_item_id = 'choco.multi_candid.all'
-    test_item_id = '/Users/forumai/Documents/work/stanford_work/all_item/choco.multi_candid.all'
-
-#    fin_bp_keyword = '/Users/rapigan/foreign_mount/src/BPE_CHOCO/64-False-rnn_states-bahdanau-after_split-0.5-64-64-64/choco-best-64-False-rnn_states-bahdanau-after_split-0.5-64-64-64'    
-    fin_bp_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/BPE/rnn_states-bahdanau-reverse_FALSE-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_FALSE-after_split-wv_size_16'
-
-#    fin_morph_keyword = '/Users/rapigan/foreign_mount/src/MORPH_CHOCO/64-False-rnn_states-bahdanau-after_split-0.5-64-64-64/choco-best-64-False-rnn_states-bahdanau-after_split-0.5-64-64-64'
-    fin_morph_keyword = '/Users/forumai/Documents/work/stanford_work/GENERATED_WORDS/MORPH/rnn_states-bahdanau-reverse_True-after_split-wv_size_16/choco-best-rnn_states-bahdanau-reverse_TRUE-after_split-wv_size_16'
+    fin_target = sys.argv[1]
+    fin_bp_in = sys.argv[2]
+    fin_morph_in = sys.argv[3]
+    test_item_id = sys.argv[4]
+    fin_bp_keyword = sys.argv[5]
+    fin_morph_keyword = sys.argv[6]
 
 #   fin_odd_keyword = '/Users/forumai/Documents/work/stanford_work/all_item/all_binary/choco_morph.oddratio.txt'
 
