@@ -210,7 +210,6 @@ def read_desc(item_id_morph_pos_dic, item_id_bpe_dic, fin_test_item_id):
 
         data_li.append(fea_dic)
 
-    #print(data_li[0], index_item_id_dic[0])
     return (item_id_index_dic, index_item_id_dic, data_li)
 
 
