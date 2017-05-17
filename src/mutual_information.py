@@ -17,11 +17,11 @@ INPUTS = '/Users/rapigan/Desktop/datasets/%s/%s/inputs.binary'
 
 
 def marginal(target, w, labels, source):
-    count = sum([w in desc.split() for (desc, lab) in zip(source, labels) if lab == target])
+    count = sum([w in desc.split() for (desc, lab) in zip(source, labels) if lab == target]) + 1
     return float(count) / len(source)
 
 def joint(w, source):
-    count = sum([w in desc.split() for desc in source])
+    count = sum([w in desc.split() for desc in source]) + 1
     return float(count) / len(source)
 
 
@@ -31,7 +31,8 @@ def gen_mi(vocab_src):
 
     vocab = [l.strip().split()[0] for l in open(vocab_src)]
     labels = [l.strip().split('|')[0] for l in open(OUTPUTS % (token_type, data_type))]
-    source = [l.strip() for l in open(INPUTS % (token_type, data_type))]
+    source = [' '.join([x.split(':')[0] for x in l.strip().split()]) for l in open(INPUTS % (token_type, data_type))]
+
 
     out = ''
     for w in vocab:
@@ -42,6 +43,7 @@ def gen_mi(vocab_src):
             mi = joint_prob * math.log(joint_prob / (marg_0 * marg_1))
         except:
             mi = -1
+
         out += '%s\t%s\n' % (w, mi)
     
     with open(vocab_src + '.mi', 'w') as f:
@@ -52,10 +54,8 @@ def gen_mi(vocab_src):
 vocabs = [
     '/Users/rapigan/Desktop/words_with_mi2//words/lasso/choco/choco_bpe_lasso.txt',
     '/Users/rapigan/Desktop/words_with_mi2//words/lasso/choco/choco_morph_lasso.txt',
-    '/Users/rapigan/Desktop/words_with_mi2//words/lasso/choco/mi_choco_bpe_lasso.txt',
     '/Users/rapigan/Desktop/words_with_mi2//words/lasso/health/health_bpe_lasso.txt',
     '/Users/rapigan/Desktop/words_with_mi2//words/lasso/health/health_morph_lasso.txt',
-    '/Users/rapigan/Desktop/words_with_mi2//words/lasso/health/mi_health_bpe_lasso.txt',
     '/Users/rapigan/Desktop/words_with_mi2//words/or/choco/bpe',
     '/Users/rapigan/Desktop/words_with_mi2//words/or/choco/morph',
     '/Users/rapigan/Desktop/words_with_mi2//words/or/health/bpe',
@@ -69,4 +69,7 @@ vocabs = [
     '/Users/rapigan/Desktop/words_with_mi2//words/rnn/health/best_morph_flipped',
     '/Users/rapigan/Desktop/words_with_mi2//words/rnn/health/best_morph_notflipped'
 ]
+
+#gen_mi(vocabs[-1])
+
 Parallel(n_jobs=4)(delayed(gen_mi)(v) for v in vocabs)
