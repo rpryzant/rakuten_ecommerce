@@ -234,6 +234,8 @@ for ja_line, line in zip(ja, en):
     for word in gen_words(line, ja_word, STOPS):
         types.append(char_type(ja_word))
 
+
+
         if types[-1] != 'other':
             hyp, height = hypernym(word, height=7)
             hyps.append(hyp if height > -1 else 'N/A')
@@ -248,9 +250,9 @@ for ja_line, line in zip(ja, en):
             sents.append(NA)
             fulls.append(NA)
 
-
-#        print word, ja_word, hyp_w, pos_w, loc_w, char_w, sent_w, word_w
-
+        if sents[-1] == 'neg':
+            print word, ja_word
+quit()
 categorical_hist(hyps, 'hyponyms', name=plt_name + '_hyponyms')
 categorical_hist(types, 'word types', name=plt_name + '_types')
 categorical_hist(poss, 'pos', name=plt_name + '_pos')
