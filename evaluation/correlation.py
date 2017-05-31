@@ -1,5 +1,9 @@
 """
 python correlation.py /Users/rapigan/Documents/rakuten/words_with_mi2/words/rnn/choco/best_bpe_flipped  /Users/rapigan/Documents/rakuten/datasets/bpe/choco/inputs.binary /Users/rapigan/Documents/rakuten/datasets/bpe/choco/outputs.binary
+python correlation.py /Users/rapigan/Documents/rakuten/words_with_mi2/words/or/choco/bpe   /Users/rapigan/Documents/rakuten/datasets/bpe/choco/inputs.binary /Users/rapigan/Documents/rakuten/datasets/bpe/choco/outputs.binary
+python correlation.py /Users/rapigan/Documents/rakuten/words_with_mi2/words/lasso/choco/choco_bpe_lasso.txt   /Users/rapigan/Documents/rakuten/datasets/bpe/choco/inputs.binary /Users/rapigan/Documents/rakuten/datasets/bpe/choco/outputs.binary
+python correlation.py /Users/rapigan/Documents/rakuten/words_with_mi2/words/rnn/choco/best_bpe_notflipped    /Users/rapigan/Documents/rakuten/datasets/bpe/choco/inputs.binary /Users/rapigan/Documents/rakuten/datasets/bpe/choco/outputs.binary
+
 
 python correlation.py [word_list] [input file] [output file]
 """
