@@ -1,3 +1,7 @@
+_This repository is **DEPRECIATED**. 
+Please see [this repo](https://github.com/rpryzant/deconfounded_lexicon_induction) for an official code release._
+
+
 # Rakuten Ecommerce
 Discovering the best parts of ecommerce product descriptions. Data courtesy of [Rakuten](http://global.rakuten.com/en/). 
 
